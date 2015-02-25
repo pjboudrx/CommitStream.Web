@@ -91,8 +91,8 @@
 
   // Here are some thoughts around the inbox cases of
   // posting to /api/inboxes
-  // posting to /api/inboxes/:uuid
-  // geting from /api/inboxes/:uuid
+  // posting to /api/inboxes/:inboxId
+  // geting from /api/inboxes/:inboxId
   // hypermediaResponseInboxCreation
   // hypermediaResponseInboxPost
   // hypermediaResponseInboxInformation
@@ -104,48 +104,48 @@
   // halResponse.addLink(key, value), which removes the need to name them specifically.
 
   hypermediaResponse.inboxes = {};
-  hypermediaResponse.inboxes.uuid = {};
-  hypermediaResponse.inboxes.uuid.commits = {};
+  hypermediaResponse.inboxes.inboxId = {};
+  hypermediaResponse.inboxes.inboxId.commits = {};
 
 
-  hypermediaResponse.inboxes.POST = function(href, inboxId) {
+  hypermediaResponse.inboxes.POST = function(href, instanceId, inboxId) {
     return {
       "_links": {
         "self": {
-          "href": href("/api/inboxes/" + inboxId)
+          "href": href("/api/" + instanceId + "/inboxes/" + inboxId)
         },
         "add-commit": {
-          "href": href("/api/inboxes/" + inboxId + "/commits")
+          "href": href("/api/" + instanceId + "/inboxes/" + inboxId + "/commits")
         }
       },
       "inboxId": inboxId
     };
   }
 
-  hypermediaResponse.inboxes.uuid.GET = function(href, dataObject) {
+  hypermediaResponse.inboxes.inboxId.GET = function(href, instanceId, inbox) {
     return {
       "_links": {
         "self": {
-          "href": href("/api/inboxes/" + dataObject.inboxId)
+          "href": href("/api/" + instanceId + "/inboxes/" + inbox.inboxId)
         },
         "digest-parent": {
-          "href": href("/api/digests/" + dataObject.digestId)
+          "href": href("/api/" + instanceId + "/digests/" + inbox.digestId)
         }
       },
-      "family": dataObject.family,
-      "name": dataObject.name,
-      "url": dataObject.url
+      "family": inbox.family,
+      "name": inbox.name,
+      "url": inbox.url
     };
   }
 
-  hypermediaResponse.inboxes.uuid.commits.POST = function(href, dataObject) {
+  hypermediaResponse.inboxes.inboxId.commits.POST = function(href, instanceId, dataObject) {
     return {
       "_links": {
         "self": {
-          "href": href("/api/inboxes/" + dataObject.inboxId)
+          "href": href("/api/" + instanceId + "/inboxes/" + dataObject.inboxId)
         },
         "digest-parent": {
-          "href": href("/api/digests/" + dataObject.digestId)
+          "href": href("/api/" + instanceId + "/digests/" + dataObject.digestId)
         },
         "query-digest": {
           "href": href("/api/query?digestId=" + dataObject.digestId + "&workitem=all")
