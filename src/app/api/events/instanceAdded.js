@@ -6,7 +6,7 @@
 		var eventId = uuid();
 		var apiKey = uuid();
 		return {
-			eventType: 'instanceAdded',
+			eventType: 'InstanceAdded',
 			eventId: eventId,
 			data: {
 				instanceId: instanceId,

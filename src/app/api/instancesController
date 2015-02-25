@@ -8,14 +8,9 @@
     eventStore = require('./helpers/eventStoreClient'),
     bodyParser = require('body-parser'),
     sanitize = require('sanitize-html'),
-    urls = require('./urls'),
     _ = require('underscore');
 
-
-  function createHypermediaResponse(href, instanceId) {
-
-    console.log("id: " + instanceId);
-
+  function createHypermediaResponse(href, instanceId, apiKey) {
     var response = {
       "_links": {
         "self": {
@@ -30,16 +25,15 @@
           "title": "Endpoint for creating a digest on instance " + instanceId + "."
         }
       },
-      "instanceId": instanceId
-    };    
-
-    console.log(response);
+      "instanceId": instanceId,
+      "apiKey": apiKey
+    };
 
     return response;
   }
 
   instancesController.init = function(app) {
-    
+
     app.post('/api/instances', bodyParser.json(), function(req, res) {
       var contentType = req.get('Content-Type');
 
@@ -71,7 +65,7 @@
         if (error) {
           csError.errorHandler(error, req, res); // TODO replace hacky csError stuff with http://nodejs.org/api/domain.html https://www.npmjs.com/package/express-domain-middleware
         } else {
-          var hypermedia = createHypermediaResponse(req.href, instanceAddedEvent.data.instanceId);
+          var hypermedia = createHypermediaResponse(req.href, instanceAddedEvent.data.instanceId, instanceAddedEvent.data.apiKey);
 
           res.location(hypermedia._links.self.href);
           res.set('Content-Type', 'application/hal+json');
@@ -85,6 +79,9 @@
     });
 
     app.get('/api/instances/:instanceId', function(req, res) {
+      console.log('from controller:');
+      console.log(req.route);
+      console.log(req.params.instanceId);
       // TODO replace hacky csError stuff with http://nodejs.org/api/domain.html https://www.npmjs.com/package/express-domain-middleware
       if (!validator.isUUID(req.params.instanceId)) { // <-- TODO this may not actually be a UUID
         throw csError('The value "' + req.params.instanceId + '" is not recognized as a valid instance identifier.');
@@ -97,9 +94,10 @@
             csError.errorHandler(err, req, res);
           } else if (!resp.body || resp.body.length < 1 || resp.statusCode === 404) { // TODO: we should handle 404 from EventStore consistently
             csError.errorHandler(csError('Could not find an instance with id ' + req.params.instanceId, 404), req, res);
+            //throw csError('Could not find an instance with id ' + req.params.instanceId, 404);
           } else { // all good
             var data = JSON.parse(resp.body);
-            var hypermedia = createHypermediaResponse(req.href, data.instanceId);
+            var hypermedia = createHypermediaResponse(req.href, data.instanceId, data.apiKey);
             res.set('Content-Type', 'application/hal+json; charset=utf-8');
             res.send(hypermedia);
           }
