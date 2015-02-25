@@ -1,5 +1,4 @@
 (function(instancesController) {
-
   var uuid = require('uuid-v4'),
     config = require('../config'),
     csError = require('../csError'),
@@ -33,7 +32,6 @@
   }
 
   instancesController.init = function(app) {
-
     app.param('instanceId', function(req, res, next, instanceId) {
       eventStore.projection.getState({
         name: 'instance',
@@ -55,7 +53,6 @@
           }
         }
       });
-
     });
 
     app.post('/api/instances', bodyParser.json(), function(req, res) {
@@ -103,9 +100,6 @@
     });
 
     app.get('/api/instances/:instanceId', function(req, res) {
-      console.log('from controller:');
-      console.log(req.instance);
-
       // TODO replace hacky csError stuff with http://nodejs.org/api/domain.html https://www.npmjs.com/package/express-domain-middleware
       if (!validator.isUUID(req.params.instanceId)) { // <-- TODO this may not actually be a UUID
         throw csError('The value "' + req.params.instanceId + '" is not recognized as a valid instance identifier.');
@@ -128,5 +122,5 @@
         });
       }
     });
-  };
+  };  
 })(module.exports);

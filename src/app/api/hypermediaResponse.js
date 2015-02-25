@@ -3,17 +3,17 @@
   var config = require('../config');
 
   hypermediaResponse.digests = {};
-  hypermediaResponse.digests.POST = function(href, digestId) {
+  hypermediaResponse.digests.POST = function(href, instanceId, digestId) {
     return {
       "_links": {
         "self": {
-          "href": href("/api/digests/" + digestId)
+          "href": href("/api/" + instanceId + "/digests/" + digestId)
         },
         "digests": {
-          "href": href("/api/digests")
+          "href": href("/api/" + instanceId + "/digests")
         },
         "inbox-create": {
-          "href": href("/api/inboxes"),
+          "href": href("/api/" + instanceId + "/digests/" + digestId + "/inboxes"),
           "method": "POST",
           "title": "Endpoint for creating an inbox for a repository on digest " + digestId + "."
         }
@@ -22,22 +22,22 @@
     };
   };
 
-  hypermediaResponse.digestGET = function(href, digestId, data) {
+  hypermediaResponse.digestGET = function(href, instanceId, digestId, data) {
     var response = {
       "_links": {
         "self": {
-          "href": href("/api/digests/" + digestId)
+          "href": href("/api/" + instanceId + "/digests/" + digestId)
         },
         "digests": {
-          "href": href("/api/digests")
+          "href": href("/api/" + instanceId + "/digests")
         },
         "inbox-create": {
-          "href": href("/api/inboxes"),
+          "href": href("/api/" + instanceId + "/digests/" + digestId + "/inboxes"),
           "method": "POST",
           "title": "Endpoint for creating an inbox for a repository on digest " + digestId + "."
         },
         "inboxes": {
-          "href": href("/api/digests/" + digestId + "/inboxes")
+          "href": href("/api/" + instanceId + "/digests/" + digestId + "/inboxes")
         }
       }
     };
@@ -49,12 +49,12 @@
   };
 
 
-  hypermediaResponse.digestsGET = function(href, digests) {
+  hypermediaResponse.digestsGET = function(href, instanceId, digests) {
 
     var response = {
       "_links": {
         "self": {
-          "href": href("/api/digests")
+          "href": href("/api/" + instanceId + "/digests")
         }
       },
       "count": digests ? digests.length : 0,
@@ -67,7 +67,7 @@
       return {
         "_links": {
           "self": {
-            "href": href("/api/digests/" + digest.digestId)
+            "href": href("/api/" + instanceId + "/digests/" + digest.digestId)
           }
         },
         "digestId": digest.digestId,

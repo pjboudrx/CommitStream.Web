@@ -1,5 +1,4 @@
 (function(digestsController) {
-
   var uuid = require('uuid-v4'),
     config = require('../config'),
     validator = require('validator'),
@@ -12,7 +11,6 @@
     _ = require('underscore');
 
   digestsController.init = function(app) {
-
     /**
      * The hypermedia to creating a digest will have links (see _links below) to other resources
      * that are a result of having created a digest. Those links are identified for documentation
@@ -26,7 +24,7 @@
      * @apiSuccess {Array[Object]} _links - Links to other resources as a result of creating a digest.
      *                               rel: 'inbox-form' links to a form for creating a new inbox for a repository.
      **/
-    app.post('/api/digests', bodyParser.json(), function(req, res) {
+    app.post('/api/:instanceId/digests', bodyParser.json(), function(req, res) {
       var contentType = req.get('Content-Type');
 
       if (!contentType || contentType.toLowerCase() !== 'application/json') {
@@ -66,7 +64,7 @@
         return;
       }
 
-      var digestAddedEvent = digestAdded.create(description);
+      var digestAddedEvent = digestAdded.create(req.instance.instanceId, description);
 
       var args = {
         name: 'digests',
@@ -78,6 +76,7 @@
           // WHAT TO DO HERE?? NEED SOME TESTS FOR ERROR CASES.
         } else {
           var hypermedia = hypermediaResponse.digests.POST(href,
+            req.instance.instanceId,
             digestAddedEvent.data.digestId);
 
           res.location(hypermedia._links.self.href);
@@ -221,31 +220,31 @@
       }
     });
 
-    app.get('/api/digests', bodyParser.json(), function(req, res) {
-      var href = urls.href(req);
-
-      eventStore.streams.get({
-        name: 'digests'
+    app.get('/api/:instanceId/digests', bodyParser.json(), function(req, res) {
+      eventStore.projection.getState({
+        name: 'digests-for-instance',
+        partition: 'instanceDigest-' + req.instance.instanceId
       }, function(err, resp) {
         if (err) {
           res.status(500).json({
             'error': 'There was an internal error when trying to process your request.'
           });
-        } else if (resp.statusCode == 404) {
-          var response = hypermediaResponse.digestsGET(href);
+        } else if (!resp.body || resp.body.length < 1 || resp.statusCode === 404) {
+          var response = hypermediaResponse.digestsGET(req.href, req.instance.instanceId);
           res.set('Content-Type', 'application/hal+json; charset=utf-8');
           res.send(response);
-        } else {
+        } else { // all good
           var data = JSON.parse(resp.body);
-          var digests = _.map(data.entries, function(entry) {
-            return entry.content.data;
+
+          var digests = _.map(_.pairs(data.digests), function(pair) {
+            return pair[1];
           });
-          var response = hypermediaResponse.digestsGET(href, digests);
+
+          var response = hypermediaResponse.digestsGET(req.href, req.instance.instanceId, digests);
           res.set('Content-Type', 'application/hal+json; charset=utf-8');
           res.send(response);
         }
-      });
+      });      
     });
-
   };
 })(module.exports);

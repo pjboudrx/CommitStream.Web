@@ -1,5 +1,4 @@
 (function(inboxesController) {
-
   var uuid = require('uuid-v4'),
     config = require('../config'),
     validator = require('validator'),
