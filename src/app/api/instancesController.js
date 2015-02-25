@@ -34,6 +34,30 @@
 
   instancesController.init = function(app) {
 
+    app.param('instanceId', function(req, res, next, instanceId) {
+      eventStore.projection.getState({
+        name: 'instance',
+        partition: 'instance-' + instanceId
+      }, function(err, resp) {
+        if (err) {
+          csError.errorHandler(err, req, res);
+        } else if (!resp.body || resp.body.length < 1 || resp.statusCode === 404) { // TODO: we should handle 404 from EventStore consistently
+          csError.errorHandler(csError('Could not find an instance with id ' + req.params.instanceId, 404), req, res);
+          //throw csError('Could not find an instance with id ' + req.params.instanceId, 404);
+        } else { // all good
+          var data = JSON.parse(resp.body);
+
+          if (data.apiKey === req.query.apiKey) {
+            req.instance = data;
+            next();
+          } else {
+            csError.errorHandler(csError('Invalid apiKey for instance ' + instanceId, 401), req, res);
+          }
+        }
+      });
+
+    });
+
     app.post('/api/instances', bodyParser.json(), function(req, res) {
       var contentType = req.get('Content-Type');
 
@@ -80,8 +104,8 @@
 
     app.get('/api/instances/:instanceId', function(req, res) {
       console.log('from controller:');
-      console.log(req.route);
-      console.log(req.params.instanceId);
+      console.log(req.instance);
+
       // TODO replace hacky csError stuff with http://nodejs.org/api/domain.html https://www.npmjs.com/package/express-domain-middleware
       if (!validator.isUUID(req.params.instanceId)) { // <-- TODO this may not actually be a UUID
         throw csError('The value "' + req.params.instanceId + '" is not recognized as a valid instance identifier.');
