@@ -2,6 +2,8 @@ var express = require('express'),
   app = express(),
   cors = require('cors'),
   config = require('./config'),
+  href = require('./href'),
+  csError = require('./csError'),
   apikey = require('./apikey'),
   exphbs = require('express-handlebars'),
   validation = require('./configValidation');
@@ -33,6 +35,8 @@ app.use(cors());
 
 app.use(express.static(__dirname + '/client'));
 
+app.use(href);
+
 app.get('/instances', function(req, res) {
   res.render('instances');
 });
@@ -48,6 +52,8 @@ app.use(function(req, res, next) {
 
 // Map API the routes
 api.init(app);
+
+app.use(csError.errorHandler);
 
 app.get('/app', function(req, res) {
   res.setHeader('content-type', 'application/javascript');

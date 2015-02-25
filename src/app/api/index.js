@@ -1,6 +1,7 @@
 (function (api) {
 	api.init = function (app) {
 		var controllers = [
+			'instances',
 			'import', 
 			'query', 
 			'settings',
