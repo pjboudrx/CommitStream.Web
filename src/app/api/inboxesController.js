@@ -54,7 +54,7 @@
           var inboxAddedEvent = inboxAdded.create(req.body.digestId, req.body.family, req.body.name, req.body.url);          
 
           var args = {
-            name: 'inboxes',
+            name: 'inboxes-' + req.instance.instanceId,
             events: JSON.stringify([inboxAddedEvent])
           };
 

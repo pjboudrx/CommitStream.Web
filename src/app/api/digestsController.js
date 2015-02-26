@@ -67,7 +67,7 @@
       var digestAddedEvent = digestAdded.create(req.instance.instanceId, description);
 
       var args = {
-        name: 'digests',
+        name: 'digests-' + req.instance.instanceId,
         events: JSON.stringify([digestAddedEvent])
       };
 
