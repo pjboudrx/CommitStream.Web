@@ -5,11 +5,14 @@ var getWorkitems = function(message) {
 }
 
 var callback = function(state, ev) {
-  var workItems = getWorkitems(ev.data.commit.message);
-  workItems.forEach(function(workItem) {
-    workItem = workItem.toUpperCase();
-    linkTo('versionOne_CommitsWithWorkitems-' + ev.metadata.instanceId + '_' + workItem, ev);
-  });
+  if (e.eventType[0] != '$' && ev.metadata && ev.metadata.instanceId 
+      && ev.data && ev.data.commit && ev.data.commit.message) {
+    var workItems = getWorkitems(ev.data.commit.message);
+    workItems.forEach(function(workItem) {
+      workItem = workItem.toUpperCase();
+      linkTo('versionOne_CommitsWithWorkitems-' + ev.metadata.instanceId + '_' + workItem, ev);
+    });
+  }
 };
 
 fromCategory('versionOne_CommitsWithWorkitemMention')
