@@ -10,6 +10,8 @@
 * Post to digests-:instanceId and inboxes-:instanceId categories instead of a single stream
 Adapt the by-asset 
 * Adapt the by-asset projection to create streams resolvable at instance level, perhaps like: `instanceTags-<InstanceId>_S-12345`
+* Relocate "querying and paging" to be restful resources on digests and for workitems
+  * Example for workitems: `/api/:instanceId/commits/tags/versionone/workitems/S-11233`
 * etc
 
 ## Error handling
