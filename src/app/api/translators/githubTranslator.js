@@ -3,7 +3,7 @@
   var _ = require('underscore'),
     uuid = require('uuid-v4');
 
-  githubTranslator.translatePush = function(pushEvent, instanceId, digestId) {
+  githubTranslator.translatePush = function(pushEvent, instanceId, digestId, inboxId) {
     var branch = pushEvent.ref.split('/').pop();
     var repository = {
       id: pushEvent.repository.id,
@@ -33,7 +33,8 @@
         data: commit,
         metadata: {
           instanceId: instanceId,
-          digestId: digestId
+          digestId: digestId,
+          inboxId: inboxId
         }
       };
     });

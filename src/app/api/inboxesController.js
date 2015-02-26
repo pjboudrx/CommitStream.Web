@@ -118,7 +118,7 @@
 
               var inboxId = req.params.inboxId;
 
-              var events = translator.translatePush(req.body, req.instance.instanceId, digestId);
+              var events = translator.translatePush(req.body, req.instance.instanceId, digestId, inboxId);
 
               var e = JSON.stringify(events);
 
