@@ -4,7 +4,7 @@ var express = require('express'),
   config = require('./config'),
   href = require('./href'),
   csError = require('./csError'),
-  apikey = require('./apikey'),
+  instanceAuthenticator = require('./instanceAuthenticator'),
   exphbs = require('express-handlebars'),
   validation = require('./configValidation');
 
@@ -43,7 +43,9 @@ app.get('/instances', function(req, res) {
 
 // NOTE: See above warning. Why are you even considering moving these?
 // Think thrice.
-app.use(apikey);
+
+// Ensure that all routes with :instanceId parameters are properly authenticated
+app.param('instanceId', instanceAuthenticator);
 
 app.use(function(req, res, next) {
   res.setHeader("X-CommitStream-API-Docs", "https://github.com/openAgile/CommitStream.Web");
