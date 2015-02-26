@@ -4,17 +4,23 @@
 
 * ACLs might not suffice for this. They are not granular enough.
   * Instead, at our application-level check that digestIds and inboxIds when requested through an `/api/:instanceId` child route are *actually* owned by that instance.
+    * NOTE: We didn't add these checks during the spike, but did verify that the security problem will exist if we don't add this.
+    * 
 
 ## Route and API changes
 
 * Post to digests-:instanceId and inboxes-:instanceId categories instead of a single stream
 Adapt the by-asset 
+  * NOTE: Done, works well
 * Adapt the by-asset projection to create streams resolvable at instance level, perhaps like: `instanceTags-<InstanceId>_S-12345`
+  * NOTE: Done, pattern is: `versionOne_CommitsWithWorkitems-<instanceId>_<workitem>`
 * Relocate "querying and paging" to be restful resources on digests and for workitems
   * Example for workitems: `/api/:instanceId/commits/tags/versionone/workitems/S-11233`
-* etc
+    * NOTE: Started, will continue in implementation phase
 
 ## Error handling
+
+NOTE: We did not explore any improvements in this area.
 
 * Promises?
 * Domains?
