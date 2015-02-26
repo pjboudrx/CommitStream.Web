@@ -1,3 +1,24 @@
+# Spike
+
+## Secure access
+
+* ACLs might not suffice for this. They are not granular enough.
+  * Instead, at our application-level check that digestIds and inboxIds when requested through an `/api/:instanceId` child route are *actually* owned by that instance.
+
+## Route and API changes
+
+* Post to digests-:instanceId and inboxes-:instanceId categories instead of a single stream
+Adapt the by-asset 
+* Adapt the by-asset projection to create streams resolvable at instance level, perhaps like: `instanceTags-<InstanceId>_S-12345`
+* etc
+
+## Error handling
+
+* Promises?
+* Domains?
+* Something else?
+
+
 # Background info
 
 Given a Customer ID: VersionOne-suhefuishf8y324342423
