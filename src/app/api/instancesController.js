@@ -41,7 +41,6 @@
 
   instancesController.init = function(app) {
     app.post('/api/instances', bodyParser.json(), authorize, function(req, res) {
-      authorize()
       var contentType = req.get('Content-Type');
 
       if (!contentType || contentType.toLowerCase() !== 'application/json') {

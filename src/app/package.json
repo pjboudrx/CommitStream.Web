@@ -23,6 +23,7 @@
     "proxyquire": "^1.0.1",
     "request": "^2.44.0",
     "request-json": "^0.4.13",
+    "request-promise": "^0.4.0 ",
     "sanitize-html": "^1.4.3",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.6.0",
@@ -39,8 +40,9 @@
   "scripts": {
     "start": "node server.js",
     "test": "mocha -u exports -R spec test/**/*tests.js",
-    "smoke": "mocha -u exports -R spec smoke-test/**/*tests.js",
+    "smoke": "mocha -u exports -R spec smoke-test/**/*tests.js",    
     "smoke-happy-path": "mocha -u exports -R spec smoke-test/happy-path-end-to-end.tests.js",
+    "spike": "mocha -u exports -R spec smoke-test/instanceId-spike-test.js",
     "jenkins-test": "mocha -u exports -R tap test/**/*tests.js",
     "jenkins-smoke": "mocha -u exports -R tap smoke-test/smoke.tests.js",
     "jenkins-smoke-happy-path": "mocha -u exports -R tap smoke-test/happy-path-end-to-end.tests.js"
