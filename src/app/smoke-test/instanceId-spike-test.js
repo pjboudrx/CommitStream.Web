@@ -8,62 +8,6 @@ var chai = require('chai'),
 chai.use(sinonChai);
 chai.config.includeStack = true;
 
-var commitForInstance1Inbox = {
-  "ref": "refs/heads/master",
-  "commits": [{
-    "id": "b42c285e1506edac965g92573a2121700fc92f8b",
-    "distinct": true,
-    "message": "S-11111 Updated Happy Path Validations!",
-    "timestamp": "2014-10-03T15:57:14-03:00",
-    "url": "https://github.com/kunzimariano/CommitService.DemoRepo/commit/b42c285e1506edac965g92573a2121700fc92f8b",
-    "author": {
-      "name": "shawnmarie",
-      "email": "shawn.abbott@versionone.com",
-      "username": "shawnmarie"
-    },
-    "committer": {
-      "name": "shawnmarie",
-      "email": "shawn.abbott@versionone.com",
-      "username": "shawnmarie"
-    },
-    "added": [],
-    "removed": [],
-    "modified": ["README.md"]
-  }],
-  "repository": {
-    "id": 23355501,
-    "name": "CommitService.DemoRepo"
-  }
-};
-
-var commitForInstance2Inbox = {
-  "ref": "refs/heads/master",
-  "commits": [{
-    "id": "b42c285e1506edac965g92573a2121700fc92f8b",
-    "distinct": true,
-    "message": "S-11111 Hey all this stuff broke today, what's wrong?",
-    "timestamp": "2014-10-03T15:57:14-03:00",
-    "url": "https://github.com/kunzimariano/CommitService.DemoRepo/commit/b42c285e1506edac965g92573a2121700fc92f8b",
-    "author": {
-      "name": "marieshawn",
-      "email": "abbott.shawn@versionone.com",
-      "username": "shawnmarie"
-    },
-    "committer": {
-      "name": "marieshawn",
-      "email": "abbott.shawn@versionone.com",
-      "username": "marieshawn"
-    },
-    "added": [],
-    "removed": [],
-    "modified": ["README.md"]
-  }],
-  "repository": {
-    "id": 23355501,
-    "name": "CommitService.DemoRepo"
-  }
-};
-
 var apiKeyForAddingInstance = '?apiKey=32527e4a-e5ac-46f5-9bad-2c9b7d607bd7';
 
 function href(path) {
@@ -81,7 +25,33 @@ var instance1 = {
     name: 'CommitStream.Web',
     family: 'GitHub'
   },
-  inboxCommits: commitForInstance1Inbox
+  inboxCommits: {
+    "ref": "refs/heads/master",
+    "commits": [{
+      "id": "b42c285e1506edac965g92573a2121700fc92f8b",
+      "distinct": true,
+      "message": "S-11111 Updated Happy Path Validations!",
+      "timestamp": "2014-10-03T15:57:14-03:00",
+      "url": "https://github.com/kunzimariano/CommitService.DemoRepo/commit/b42c285e1506edac965g92573a2121700fc92f8b",
+      "author": {
+        "name": "shawnmarie",
+        "email": "shawn.abbott@versionone.com",
+        "username": "shawnmarie"
+      },
+      "committer": {
+        "name": "shawnmarie",
+        "email": "shawn.abbott@versionone.com",
+        "username": "shawnmarie"
+      },
+      "added": [],
+      "removed": [],
+      "modified": ["README.md"]
+    }],
+    "repository": {
+      "id": 23355501,
+      "name": "CommitService.DemoRepo"
+    }
+  }
 };
 
 var instance2 = {
@@ -95,7 +65,33 @@ var instance2 = {
     name: 'psake-tools',
     family: 'GitHub'
   },
-  inboxCommits: commitForInstance2Inbox
+  inboxCommits: {
+    "ref": "refs/heads/master",
+    "commits": [{
+      "id": "b42c285e1506edac965g92573a2121700fc92f8b",
+      "distinct": true,
+      "message": "S-11111 Hey all this stuff broke today, what's wrong?",
+      "timestamp": "2014-10-03T15:57:14-03:00",
+      "url": "https://github.com/kunzimariano/CommitService.DemoRepo/commit/b42c285e1506edac965g92573a2121700fc92f8b",
+      "author": {
+        "name": "marieshawn",
+        "email": "abbott.shawn@versionone.com",
+        "username": "shawnmarie"
+      },
+      "committer": {
+        "name": "marieshawn",
+        "email": "abbott.shawn@versionone.com",
+        "username": "marieshawn"
+      },
+      "added": [],
+      "removed": [],
+      "modified": ["README.md"]
+    }],
+    "repository": {
+      "id": 23355501,
+      "name": "CommitService.DemoRepo"
+    }
+  }
 };
 
 function show() {
@@ -138,8 +134,11 @@ function get(uri) {
   }
 }
 
-describe('/api/instances', function() {
+function getLink(obj, relName) {
+  return obj._links[relName].href;
+}
 
+describe('/api/instances', function() {
   function instanceTest(instance, done) {
     rp(post1(
       '/instances' + apiKeyForAddingInstance,
@@ -147,49 +146,51 @@ describe('/api/instances', function() {
         instanceId: instance.instanceId
       }
     ))
-    .then(function(res) {
-      var instanceCreated = JSON.parse(res);
-      instance.digestCreateUri = instanceCreated._links['digest-create'].href + '?apiKey=' + instanceCreated.apiKey;
+    .then(function(instanceBody) {
+      var instanceCreated = JSON.parse(instanceBody);
+      instance.digestCreateUri = getLink(instanceCreated, 'digest-create') + '?apiKey=' + instanceCreated.apiKey;
       instance.apiKey = instanceCreated.apiKey;
       console.log('Created instance: ' + instanceCreated.instanceId);
-      console.log('\tdigest-create: ' + instanceCreated._links['digest-create'].href);
+      console.log('digest-create: ' + getLink(instanceCreated, 'digest-create'));
     })    
     .then(function() {      
-      rp(post(instance.digestCreateUri, instance.digest))
-      .then(function(res) {
-        var digest = JSON.parse(res);
-        var inboxCreateUri = digest._links['inbox-create'].href + '?apiKey=' + instance.apiKey;
-        console.log('\t\tCreated digest: ' + digest.digestId);
-        console.log('\t\tinbox-create: ' + digest._links['inbox-create'].href);
-        rp(post(inboxCreateUri, {
-          name: 'CommitStream.Web',
-          family: 'GitHub'
-        })).
-        then(function(res) {
-          var inbox = JSON.parse(res);
-          var inboxPostCommitsUri = inbox._links['add-commit'].href + '?apiKey=' + instance.apiKey;
-          console.log('\t\t\tCreated inbox: ' + inbox.inboxId);
-          console.log('\t\t\tadd-commit: ' + inbox._links['add-commit'].href);
-          rp(post(inboxPostCommitsUri, instance.inboxCommits, 
-          {
-            'x-github-event': 'push'
-          }))
-          .then(function(res) {
-            var message = JSON.parse(res);
-            console.log('\t\t\t\tcommits added: ' + message.message);
-            rp(get('/' + instance.instanceId + '/query?workitem=S-11111&apiKey=' + instance.apiKey))
-            .then(function(res) {
-              var commitMessage = JSON.parse(res).commits[0].message;
-              console.log("\t\t\t\t\tSHOULD BE ONE COMMIT:");
-              console.log("\t\t\t\t\t" + commitMessage);
-              console.log("\n\n");
-              commitMessage.should.equal(instance.inboxCommits.commits[0].message);
-            }).finally(done);
-          });
-        });
-      });
+      return rp(post(instance.digestCreateUri, instance.digest));
     })
-    .catch(console.error);
+    .then(function(digestBody) {
+      var digest = JSON.parse(digestBody);
+      var inboxCreateUri = digest._links['inbox-create'].href + '?apiKey=' + instance.apiKey;
+      console.log('Created digest: ' + digest.digestId);
+      console.log('inbox-create: ' + digest._links['inbox-create'].href);
+      return rp(post(inboxCreateUri, {
+        name: 'CommitStream.Web',
+        family: 'GitHub'
+      }));
+    })
+    .then(function(inboxBody) {
+      var inbox = JSON.parse(inboxBody);
+      var inboxPostCommitsUri = inbox._links['add-commit'].href + '?apiKey=' + instance.apiKey;
+      console.log('Created inbox: ' + inbox.inboxId);
+      console.log('add-commit: ' + inbox._links['add-commit'].href);
+      return rp(post(inboxPostCommitsUri, instance.inboxCommits, 
+        {
+        'x-github-event': 'push'
+        })
+      );
+    })
+    .then(function(inboxCommitsAddBody) {
+      var message = JSON.parse(inboxCommitsAddBody);
+      console.log('Commits added: ' + message.message);
+      return rp(get('/' + instance.instanceId + '/query?workitem=S-11111&apiKey=' + instance.apiKey));
+    })
+    .then(function(queryBody) {
+      var commitMessage = JSON.parse(queryBody).commits[0].message;
+      commitMessage.should.equal(instance.inboxCommits.commits[0].message);      
+      console.log("JUST ONE COMMIT:");
+      console.log(commitMessage);
+      console.log("\n");
+    })
+    .catch(console.error)
+    .finally(done);
   }    
 
   it('Has isolated data for instance1.', function(done) {    
