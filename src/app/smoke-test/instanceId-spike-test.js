@@ -6,7 +6,7 @@ var chai = require('chai'),
   rp = require('request-promise'),
   base = require('./lib/base');
 
-base.enableLogging(false);
+base.enableLogging(true);
 _.extend(global, base);
 
 _.extend(global, require('./testData'));
@@ -54,10 +54,13 @@ function instanceTest(testCase, it) {
       }))
       .then(function(addCommitResponse) {
         addCommitResponse.message.should.equal(testCase.expectedMessage);
+        console.log('```json\n' + JSON.stringify(addCommitResponse.message, ' ', 2) + '\n```\n\n');
         var query = get('/' + testCase.instance.instanceId + '/query?workitem=' + testCase.workItemToQueryFor + '&apiKey=' + getApiKey());
+        console.log(query);
         return rp(query);
       })
       .then(function(queryResponse) {
+        console.log('```json\n' + JSON.stringify(queryResponse, ' ', 2) + '\n```\n\n');
         var firstMessage = queryResponse.commits[0].message;
         firstMessage.should.equal(testCase.commits.commits[0].message);
         console.log("Here is the first commit:");

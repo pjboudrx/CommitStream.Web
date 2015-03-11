@@ -65,18 +65,25 @@
     return obj._links[linkName].href;
   }
 
-  var loggingSeparator = '---------------';
+  var loggingSeparator = '<hr/>';
 
   function postToLink(linkName, data, extraHeaders) {
     return function(halResponse) {
       if (LOGGING) {
-        console.log('HAL RESPONSE:');
-        console.log(halResponse);
-        console.log(loggingSeparator);
+        console.log('After getting this HAL response:\n\n');
+        console.log('```json\n' + JSON.stringify(halResponse, ' ', 2) + '\n```\n\n');
       }
       if (halResponse.apiKey) apiKey = halResponse.apiKey; // Cheap n dirty
       var link = getLink(halResponse, linkName);
       if (apiKey !== null) link += "?apiKey=" + apiKey;
+
+      if (LOGGING) {
+        console.log('We then extract the `' + linkName + '` link from the `_links` property, returning:\n\n');
+        console.log('`' + link + '`.\n\n');
+        console.log('And then POST the following JSON body to that link:\n\n');
+        console.log('```json\n' + JSON.stringify(data, ' ', 2) + '\n```\n\n');
+        console.log(loggingSeparator);
+      }
       return rp(postOptions(link, data, extraHeaders));
     };
   }
