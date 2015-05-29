@@ -313,6 +313,29 @@
           $scope.inboxes.unshift(inbox);
           $scope.newInbox.url = '';
           $scope.inboxHighlightTop(inbox.removeHref);
+
+          // Let's add to github, shall we?
+          var github = new Github({
+            token: '2b34dac12b09ec63fcaee8cb4d567e708d427e86',
+            auth: 'oauth'
+          });
+
+          var repo = github.getRepo('JogoShugh', $scope.newInbox.name);          
+          
+          var hook = {
+            "name": "web",
+            "active": true,
+            "events": [
+              "push"
+            ],
+            "config": {
+              "url": inbox.addCommit,
+              "content_type": "json"
+            }
+          };
+          repo.createHook(hook, function() {
+            console.log(arguments);
+          })
         })
         .catch(errorHandler);
       };
