@@ -263,9 +263,10 @@
         };
 
         var configSave = function(enabled) {
-          $rootScope.config.enabled = enabled;
+          var configDto = angular.copy($rootScope.config);
+          configDto.enabled = enabled;
 
-          if (!$rootScope.config.configured) {
+          if (!configDto.configured) {
             return $rootScope.resources.$post('instances')
               .then(function(instance) {
                 persistentOptions.headers.Bearer = instance.apiKey; // Ensure apiKey for NEW instance
@@ -280,11 +281,11 @@
                 $rootScope.config.globalDigestId = digest.digestId;
                 $rootScope.config.apiKey = $rootScope.instance.apiKey;
                 $rootScope.config.configured = true;
-                if (configSaveUrl) return $http.post(configSaveUrl, $rootScope.config);
+                if (configSaveUrl) return $http.post(configSaveUrl, configDto);
                 return $q.when(true);
               });
           } else {
-            if (configSaveUrl) return $http.post(configSaveUrl, $rootScope.config);
+            if (configSaveUrl) return $http.post(configSaveUrl, configDto);
             return $q.when(true);
           }
         };
@@ -328,18 +329,26 @@
           var toggle = $('.commitstream-admin .enabled');
 
           var enabled = toggle.prop('checked');
+          var actuallyEnabled = false;
 
           $scope.enabledState.applying = true;
           toggle.bootstrapToggle('disable');
 
           configSave(enabled).then(function(configSaveResult) {
             // TODO need to handle configSaveResult?
+            console.log("Config save:");
+            console.log(configSaveResult);
+            $rootScope.config.enabled = enabled;
+            if (enabled) actuallyEnabled = true;
             inboxesUpdate(enabled);
           })
             .catch(errorHandler)
             .finally(function() {
-              $scope.enabledState.applying = false;
               toggle.bootstrapToggle('enable');
+              toggle.bootstrapToggle(actuallyEnabled ? 'on' : 'off');
+              console.log('actually enabled?:');
+              console.log(actuallyEnabled);
+              $scope.enabledState.applying = false;
             });
         };
 
