@@ -262,12 +262,20 @@
           }
         };
 
+        var getCustomerName = function() {
+          var fullUrl = $location.absUrl();
+          var splitUrl = fullUrl.split('/');
+          return splitUrl[0] + '//' + splitUrl[2] + '/' + splitUrl[3];
+        }
+
         var configSave = function(enabled) {
           var configDto = angular.copy($rootScope.config);
           configDto.enabled = enabled;
 
           if (!configDto.configured) {
-            return $rootScope.resources.$post('instances')
+            return $rootScope.resources.$post('instances', {
+                'name': getCustomerName()
+              })
               .then(function(instance) {
                 persistentOptions.headers.Bearer = instance.apiKey; // Ensure apiKey for NEW instance
                 $rootScope.instance = instance;
@@ -277,15 +285,17 @@
               })
               .then(function(digest) {
                 $rootScope.digest = digest;
-                $rootScope.config.instanceId = $rootScope.instance.instanceId;
-                $rootScope.config.globalDigestId = digest.digestId;
-                $rootScope.config.apiKey = $rootScope.instance.apiKey;
-                $rootScope.config.configured = true;
+                configDto.instanceId = $rootScope.instance.instanceId;
+                configDto.globalDigestId = digest.digestId;
+                configDto.apiKey = $rootScope.instance.apiKey;
+                configDto.configured = true;
                 if (configSaveUrl) return $http.post(configSaveUrl, configDto);
                 return $q.when(true);
               });
           } else {
-            if (configSaveUrl) return $http.post(configSaveUrl, configDto);
+            if (configSaveUrl) {
+              return $http.post(configSaveUrl, configDto);
+            }
             return $q.when(true);
           }
         };
@@ -338,12 +348,16 @@
             // TODO need to handle configSaveResult?
             console.log("Config save:");
             console.log(configSaveResult);
-            $rootScope.config.enabled = enabled;
+            $rootScope.config = configSaveResult;
             if (enabled) actuallyEnabled = true;
             inboxesUpdate(enabled);
           })
-            .catch(errorHandler)
+            .catch(function(error) {
+              actuallyEnabled = false;
+              errorHandler(error);
+            })
             .finally(function() {
+              console.log($rootScope.config)
               toggle.bootstrapToggle('enable');
               toggle.bootstrapToggle(actuallyEnabled ? 'on' : 'off');
               console.log('actually enabled?:');

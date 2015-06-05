@@ -74,11 +74,12 @@ app.get('/api/public', function(req, res) {
         "href": req.href("/api/public")
       },
       "instances": {
-        "href": req.href("/api/instances")
+        "href": req.href("/api/instances{?name}"),
+        "templated": true
       },
       "instance": {
         "href": req.href("/api/instances/{instanceId}"),
-        templated: true
+        "templated": true
       },
       "digest": {
         "href": req.href('/api/{instanceId}/digests/{digestId}'),
@@ -108,7 +109,7 @@ app.use(csError.errorHandler);
 
 function getHostSettings(req) {
   return {
-    protocol : config.protocol || req.protocol,
+    protocol: config.protocol || req.protocol,
     host: req.get('host'),
     key: req.query.key
   };
