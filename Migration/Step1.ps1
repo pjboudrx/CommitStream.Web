@@ -24,10 +24,10 @@ function saveDigests(){
 function saveInboxes(){
   param($responseInboxes, $outputDigest)
 
-  $outputDigest.responseInboxes = @{}
+  $outputDigest.inboxes = @{}
 
   $responseInboxes | % {
-    $i = $outputDigest.responseInboxes[$_.inboxId] = @{}
+    $i = $outputDigest.inboxes[$_.inboxId] = @{}
 
     $i.inboxId = $_.inboxId
     $i.name = $_.name
