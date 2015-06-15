@@ -46,6 +46,8 @@ from the array of inboxes extract the inbox ids.
 
 ####Step 2####
 
+In order for this step to work you will need to install the next PS module [Tunable-SSL-Validator](https://github.com/Jaykul/Tunable-SSL-Validator).
+
 Using the previous generated JSON iterate over all the digests and inboxes. Build the streams names like this: 
 
 	inboxCommits-inboxId 
