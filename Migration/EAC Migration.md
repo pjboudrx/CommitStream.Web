@@ -48,22 +48,19 @@ from the array of inboxes extract the inbox ids.
 
 In order for this step to work you will need to install the next PS module [Tunable-SSL-Validator](https://github.com/Jaykul/Tunable-SSL-Validator).
 
-Using the previous generated JSON iterate over all the digests and inboxes. Build the streams names like this: 
+Using the previous generated JSON iterate over all the digests. Build the stream names like this: 
 
-	inboxCommits-inboxId 
+	digestCommits-digestId 
 
 Read the events from each stream, revert their order and save them in a file with the next convention
 
-    inboxId.events.js
+    digestId.js
 
-add the name of the file to the JSON object as a new property to the proper inbox.    
-    
+add the name of the file to the JSON object as a new property to the proper digest.
+
+We are grouping by digest so natural insertion order is maintained.
 
 ####Step 3####
-
-**note from meeting: - Group by digest and order so natural insertion
-order maintained**
-
 
 * Create instance per EAC (manually since we are only migrating one EAC at a time).
 * Read the JSON once more and based on it create the digests and inboxes.
