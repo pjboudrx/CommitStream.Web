@@ -5,11 +5,14 @@
 * Do one customer at a time.
 * Make a backup of the ES cluster before any import.
 
-###Three main steps###
+###Four main steps###
+
+```TODO: UPDATE THIS```
 
 1. Read from CS API so we can know the structure of the digests and inboxes.
 2. Make use of the previous information so we can read from each stream directly from ES. We should save the events of each stream in separated files. We could name the files with some convention (inboxId.events.js).
 3. Import the previously retrieved events into the new ES instance.
+4. 
 
 
 ####Step 1####
@@ -64,5 +67,8 @@ We are grouping by digest so natural insertion order is maintained.
 
 * Create instance per EAC (manually since we are only migrating one EAC at a time).
 * Read the JSON once more and based on it create the digests and inboxes.
-* Start importing the events one stream/inbox at a time.
+* Save the the new digests and inboxes ids on the JSON object. 
+
+####Step 4####
+* Start importing the events one stream/digest at a time.
 * Save the new inbox URL in the JSON file so we can inform the customers.
