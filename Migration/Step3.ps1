@@ -26,6 +26,7 @@ function createDigests {
     $json = $body | ConvertTo-Json
 
     $_.Value | Add-Member @{ "created" =  $false }
+    $_.Value | Add-Member @{ "inboxesDictionary" =  @{} }
 
     Try{
       $r = Invoke-RestMethod `
@@ -51,6 +52,7 @@ function createInboxes {
   param([Parameter(ValueFromPipeline=$true)]$input)
 
   $input.digests.PSObject.Properties | % {
+    $d = $_.Value
     $digestId = $_.Value.newDigestId
     $inboxCreateUrl = "$BASEURL/api/$instanceId/digests/$digestId/inboxes?apiKey=$apiKey"
 
@@ -75,6 +77,7 @@ function createInboxes {
           -Insecure
 
           $_.Value | Add-Member @{ "newInboxId" =  $r.inboxId }
+          $d.inboxesDictionary[$_.Value.inboxId] = $r.inboxId
           $_.Value.created = $true
       }
       Catch{

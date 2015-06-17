@@ -67,8 +67,8 @@ We are grouping by digest so natural insertion order is maintained.
 
 * Create instance per EAC (manually since we are only migrating one EAC at a time).
 * Read the JSON once more and based on it create the digests and inboxes.
-* Save the the new digests and inboxes ids on the JSON object. 
+* Save the the new digests and inboxes ids on the JSON object.
+* TODO: Save the new inbox URL in the JSON file so we can inform the customers. 
 
 ####Step 4####
 * Start importing the events one stream/digest at a time.
-* Save the new inbox URL in the JSON file so we can inform the customers.
