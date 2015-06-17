@@ -1,6 +1,7 @@
 $esUsr = ''
 $esPassword = ''
 $esUrl = ''
+$streamsDirectory = 'digests'
 
 function getAuthorizationHeader {
   'Basic ' + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($esUsr+":"+$esPassword))
@@ -14,6 +15,12 @@ function saveFile {
   param([Parameter(ValueFromPipeline=$true)]$input)
   Set-Content -Path 'output2.json' -Value (ConvertTo-Json $input -Depth 10)
   $input
+}
+
+function createStreamsDirectory {
+  if(-Not (Test-Path $streamsDirectory)) {
+    ni $streamsDirectory -type directory
+  }
 }
 
 function enrichObject {
@@ -49,7 +56,10 @@ function getStreams {
       #TODO: conversion for files too big fails with ConvertFrom-Json
       $e = ($r.Content | ConvertFrom-Json).Entries | sort -Descending
 
-      Set-Content -Path $_.Value.fileName -Value (ConvertTo-Json $e -Depth 10)
+      createStreamsDirectory
+      $filePath =  Join-Path $streamsDirectory $_.Value.fileName
+
+      Set-Content -Path $filePath -Value (ConvertTo-Json $e -Depth 10)
 
       $_.Value.hasCommits = $true
     }
