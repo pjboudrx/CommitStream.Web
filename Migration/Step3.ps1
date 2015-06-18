@@ -1,20 +1,10 @@
-$CT = 'application/json'
+. '.\Common.ps1'
 
 $instanceId = ''
 $apiKey = ''
 
 $BASEURL = 'http://localhost:6565'
 $digestCreateUrl = "$BASEURL/api/$instanceId/digests?apiKey=$apiKey"
-
-function readFile {
-  Get-Content .\output2.json -Raw -Encoding UTF8 | ConvertFrom-Json
-}
-
-function saveFile {
-  param([Parameter(ValueFromPipeline=$true)]$input)
-  Set-Content -Path 'output3.json' -Value (ConvertTo-Json $input -Depth 10)
-  $input
-}
 
 function createDigests {
   param([Parameter(ValueFromPipeline=$true)]$input)
@@ -25,20 +15,20 @@ function createDigests {
 
     $json = $body | ConvertTo-Json
 
-    $_.Value | Add-Member @{ "created" =  $false }
-    $_.Value | Add-Member @{ "inboxesDictionary" =  @{} }
+    $_.Value | Add-Member @{ 'created' =  $false }
+    $_.Value | Add-Member @{ 'inboxesDictionary' =  @{} }
 
     Try{
       $r = Invoke-RestMethod `
-        -Headers @{ "Accept"= "application/json" } `
+        -Headers @{ 'Accept'= 'application/json' } `
         -Method Post `
-        -ContentType $CT `
+        -ContentType 'application/json' `
         -URI $digestCreateUrl `
         -Body $json `
         -TimeoutSec 30 `
         -Insecure
 
-        $_.Value | Add-Member @{ "newDigestId" =  $r.digestId }
+        $_.Value | Add-Member @{ 'newDigestId' =  $r.digestId }
         $_.Value.created = $true
     }
     Catch{
@@ -64,19 +54,19 @@ function createInboxes {
 
       $json = $body | ConvertTo-Json
 
-      $_.Value | Add-Member @{ "created" =  $false }
+      $_.Value | Add-Member @{ 'created' =  $false }
 
       Try{
         $r = Invoke-RestMethod `
-          -Headers @{ "Accept"= "application/json" } `
+          -Headers @{ 'Accept'= 'application/json' } `
           -Method Post `
-          -ContentType $CT `
+          -ContentType 'application/json' `
           -URI $inboxCreateUrl `
           -Body $json `
           -TimeoutSec 30 `
           -Insecure
 
-          $_.Value | Add-Member @{ "newInboxId" =  $r.inboxId }
+          $_.Value | Add-Member @{ 'newInboxId' =  $r.inboxId }
           $d.inboxesDictionary[$_.Value.inboxId] = $r.inboxId
           $_.Value.created = $true
       }
@@ -88,8 +78,8 @@ function createInboxes {
   $input
 }
 
-readFile `
+readJson 'output2.json' `
   | createDigests `
   | createInboxes `
-  | saveFile `
+  | saveJson 'output3.json' `
   | Out-Null
