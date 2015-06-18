@@ -1,7 +1,7 @@
 
 function getAuthorizationHeader {
-  param($urs, $password)
-  'Basic ' + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($usr+":"+$password))
+  param($usr, $password)
+    'Basic ' + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($usr+":"+$password))
 }
 
 function readJson {
