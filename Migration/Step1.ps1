@@ -1,6 +1,7 @@
+. '.\Common.ps1'
+
 $key = ''
 $csUrl = ''
-$ct = 'application/json'
 $fullUrl = "$csUrl/api/digests?key=$key"
 
 function saveDigests(){
@@ -14,7 +15,7 @@ function saveDigests(){
     $d.description = $_.description
 
     $fullUrl = "$csUrl/api/digests/$($d.digestId)/inboxes?key=$key"
-    $response = Invoke-RestMethod -Method Get -ContentType $ct -Uri $fullUrl
+    $response = Invoke-RestMethod -Method Get -ContentType 'application/json' -Uri $fullUrl
 
     saveInboxes $response._embedded.inboxes $d
   }
@@ -41,5 +42,4 @@ $response = Invoke-RestMethod -Method Get -ContentType $ct -Uri $fullUrl
 
 saveDigests $response._embedded.digests $output
 
-Set-Content -Path 'output.json' -Value (ConvertTo-Json $output -Depth 10)
-
+$output | saveJson 'output.json' | Out-Null

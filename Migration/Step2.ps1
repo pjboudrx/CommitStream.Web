@@ -1,21 +1,9 @@
+. '.\Common.ps1'
+
 $esUsr = ''
 $esPassword = ''
 $esUrl = ''
 $streamsDirectory = 'digests'
-
-function getAuthorizationHeader {
-  'Basic ' + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($esUsr+":"+$esPassword))
-}
-
-function readFile {
-  Get-Content .\output.json -Raw -Encoding UTF8 | ConvertFrom-Json
-}
-
-function saveFile {
-  param([Parameter(ValueFromPipeline=$true)]$input)
-  Set-Content -Path 'output2.json' -Value (ConvertTo-Json $input -Depth 10)
-  $input
-}
 
 function createStreamsDirectory {
   if(-Not (Test-Path $streamsDirectory)) {
@@ -28,9 +16,9 @@ function enrichObject {
 
   $input.digests.PSObject.Properties | % {
     $digestId = $_.Value.digestId
-    $_.Value | Add-Member @{ "streamName" =  "digestCommits-$digestId" }
-    $_.Value | Add-Member @{ "fileName" =  "$digestId.json" }
-    $_.Value | Add-Member @{ "hasCommits" =  $false }
+    $_.Value | Add-Member @{ 'streamName' =  "digestCommits-$digestId" }
+    $_.Value | Add-Member @{ 'fileName' =  "$digestId.json" }
+    $_.Value | Add-Member @{ 'hasCommits' =  $false }
   }
 
   $input
@@ -48,7 +36,7 @@ function getStreams {
 
     Try{
       $r = Invoke-WebRequest `
-        -Headers @{ "AUTHORIZATION" = (getAuthorizationHeader); "Accept"= "application/json" } `
+        -Headers @{ 'Authorization' = (getAuthorizationHeader $esUsr $esPassword); 'Accept'= 'application/json' } `
         -URI $currentUri `
         -TimeoutSec 30 `
         -Insecure
@@ -67,13 +55,11 @@ function getStreams {
       Write-Host $_.Exception.Message
     }
   }
-
   $input
 }
 
-readFile `
+readJson 'output.json' `
   | enrichObject `
-  | saveFile `
   | getStreams `
-  | saveFile `
+  | saveJson 'output2.json' `
   | out-null

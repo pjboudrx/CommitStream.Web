@@ -1,4 +1,4 @@
-. ".\Common.ps1"
+. '.\Common.ps1'
 
 $esUrl = 'http://localhost:2113'
 $esUsr = 'admin'
@@ -9,7 +9,7 @@ $data = @{}
 
 function readEvents {
    process {
-      $_.Value.digests.PSObject.Properties | % {
+      $_.digests.PSObject.Properties | % {
           readJson (Join-Path $eventsDirectory $_.Value.fileName)
       }
    }
@@ -25,21 +25,21 @@ function postStream {
       $body.metaData = @{}
 
       $oldDigestId = ($_.metaData | ConvertFrom-Json).digestId
-      $body.metaData.digestId = $data.Value.digests."$oldDigestId".newDigestId
+      $body.metaData.digestId = $data.digests."$oldDigestId".newDigestId
 
       $oldInboxId = ($_.streamId -split 'inboxCommits-')[1].Trim()
-      $streamName = $data.Value.digests."$oldDigestId".inboxesDictionary."$oldInboxId"
+      $streamName = $data.digests."$oldDigestId".inboxesDictionary."$oldInboxId"
 
       $json = $body | ConvertTo-Json
-      $json = "[" + $json + "]"
+      $json = '[' + $json + ']'
 
       $currentUri = "$esUrl/streams/inboxCommits-$streamName"
       Write-Host $currentUri
 
       Try{
         $r = Invoke-WebRequest `
-          -Headers @{ "AUTHORIZATION" = (getAuthorizationHeader $esUsr $esPassword) } `
-          -ContentType "application/vnd.eventstore.events+json" `
+          -Headers @{ 'Authorization' = (getAuthorizationHeader $esUsr $esPassword) } `
+          -ContentType 'application/vnd.eventstore.events+json' `
           -URI $currentUri `
           -TimeoutSec 30 `
           -Method Post `
@@ -54,7 +54,6 @@ function postStream {
 
 }
 
-$data = readJson '.\output3.json'
-$data `
+($data = readJson '.\output3.json') `
   | readEvents `
   | postStream

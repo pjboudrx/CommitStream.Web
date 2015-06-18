@@ -13,7 +13,8 @@ function saveJson {
   param([Parameter(ValueFromPipeline=$true)]$input, [Parameter(Mandatory=$true,Position=0)]$file)
 
   process{
-    Set-Content -Path $file -Value (ConvertTo-Json $input -Depth 10)
+    $json = ConvertTo-Json $input[0] -Depth 10 -Compress
+    Set-Content $file $json
     $input
   }
 }
