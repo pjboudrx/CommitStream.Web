@@ -29,6 +29,8 @@ function createDigests {
         -Insecure
 
         $_.Value | Add-Member @{ 'newDigestId' =  $r.digestId }
+        $trUrl = "$BASEURL/api/$instanceId/digests/$($r.digestId)/commits?apiKey=$apiKey"
+        $_.Value | Add-Member @{ 'teamRoomUrl' = $trUrl }
         $_.Value.created = $true
     }
     Catch{
@@ -68,6 +70,7 @@ function createInboxes {
 
           $_.Value | Add-Member @{ 'newInboxId' =  $r.inboxId }
           $d.inboxesDictionary[$_.Value.inboxId] = $r.inboxId
+          $_.Value | Add-Member @{ 'webHook' = "$($r._links.'add-commit'.href)?apiKey=$apiKey" }
           $_.Value.created = $true
       }
       Catch{
