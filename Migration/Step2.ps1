@@ -3,7 +3,7 @@
 $esUsr = ''
 $esPassword = ''
 $esUrl = ''
-$streamsDirectory = 'digests'
+$streamsDirectory = ''
 
 function createStreamsDirectory {
   if(-Not (Test-Path $streamsDirectory)) {
@@ -31,7 +31,7 @@ function getStreams {
     $digestId = $_.Value.digestId
 
     #TODO: increase the number
-    $currentUri = "$esUrl/streams/$($_.Value.streamName)/head/backward/100?embed=tryharder"
+    $currentUri = "$esUrl/streams/$($_.Value.streamName)/head/backward/99999?embed=tryharder"
     Write-Host $currentUri
 
     Try{
@@ -41,8 +41,14 @@ function getStreams {
         -TimeoutSec 30 `
         -Insecure
 
-      #TODO: conversion for files too big fails with ConvertFrom-Json
-      $e = ($r.Content | ConvertFrom-Json).Entries | sort -Descending
+      $json = New-Object -TypeName System.Web.Script.Serialization.JavaScriptSerializer
+      $json.MaxJsonLength = 104857600 #100mb as bytes, default is 2mb
+
+      $data = $json.Deserialize($r.Content, [System.Object])
+      $json = $null
+
+      $e = $data.entries  
+      [array]::Reverse($e)    
 
       createStreamsDirectory
       $filePath =  Join-Path $streamsDirectory $_.Value.fileName
