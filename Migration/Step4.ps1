@@ -10,7 +10,13 @@ $data = @{}
 function readEvents {
    process {
       $_.digests.PSObject.Properties | % {
-          readJson (Join-Path $eventsDirectory $_.Value.fileName)
+          $content = Get-Content -Path (Join-Path $eventsDirectory $_.Value.fileName) -Raw -Encoding UTF8
+          $json = New-Object -TypeName System.Web.Script.Serialization.JavaScriptSerializer
+          $json.MaxJsonLength = 104857600 #100mb as bytes, default is 2mb
+
+          $data = $json.Deserialize($content, [System.Object])
+          $json = $null
+          $data
       }
    }
 }
@@ -24,11 +30,16 @@ function postStream {
       $body.data = $_.data
       $body.metaData = @{}
 
+      $body.metaData.instanceId = $data.instanceId
+
       $oldDigestId = ($_.metaData | ConvertFrom-Json).digestId
       $body.metaData.digestId = $data.digests."$oldDigestId".newDigestId
 
       $oldInboxId = ($_.streamId -split 'inboxCommits-')[1].Trim()
       $streamName = $data.digests."$oldDigestId".inboxesDictionary."$oldInboxId"
+
+      $digest = $data.digests."$oldDigestId"
+      $body.metaData.inboxId = $digest.inboxes."$oldInboxId".newInboxId
 
       $json = $body | ConvertTo-Json
       $json = '[' + $json + ']'

@@ -9,6 +9,8 @@ $digestCreateUrl = "$BASEURL/api/$instanceId/digests?apiKey=$apiKey"
 function createDigests {
   param([Parameter(ValueFromPipeline=$true)]$input)
 
+  $input | Add-Member @{ 'instanceId' = $instanceId }
+
   $input.digests.PSObject.Properties | % {
     $body = @{}
     $body.description = $_.Value.description
