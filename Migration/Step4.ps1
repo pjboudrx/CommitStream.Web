@@ -10,6 +10,7 @@ $data = @{}
 function readEvents {
    process {
       $_.digests.PSObject.Properties | % {
+          #TODO: make this work on common
           $content = Get-Content -Path (Join-Path $eventsDirectory $_.Value.fileName) -Raw -Encoding UTF8
           $json = New-Object -TypeName System.Web.Script.Serialization.JavaScriptSerializer
           $json.MaxJsonLength = 104857600 #100mb as bytes, default is 2mb
@@ -21,7 +22,7 @@ function readEvents {
    }
 }
 
-function postStream {
+function postToStream {
   process {
     $_ | % {
       $body = @{}
@@ -47,24 +48,37 @@ function postStream {
       $currentUri = "$esUrl/streams/inboxCommits-$streamName"
       Write-Host $currentUri
 
-      Try{
-        $r = Invoke-WebRequest `
-          -Headers @{ 'Authorization' = (getAuthorizationHeader $esUsr $esPassword) } `
-          -ContentType 'application/vnd.eventstore.events+json' `
-          -URI $currentUri `
-          -TimeoutSec 30 `
-          -Method Post `
-          -Insecure `
-          -Body $json
-      }
-      Catch{
-        Write-Host $_.Exception.Message
-      }
+      invokeRequest $currentUri $json 0
     }
   }
+}
 
+function invokeRequest {
+  param($uri, $body, $retry)
+  Try{
+    $r = Invoke-WebRequest `
+      -Headers @{ 'Authorization' = (getAuthorizationHeader $esUsr $esPassword) } `
+      -ContentType 'application/vnd.eventstore.events+json' `
+      -URI $uri `
+      -TimeoutSec 30 `
+      -Method Post `
+      -Insecure `
+      -Body $body
+      throw 'meh'
+  }
+  Catch{
+    Write-Host $_.Exception.Message
+    $retry++
+    if($retry -lt 3){
+      Write-Host "Retry number $retry"
+      invokeRequest $uri $body $retry
+    }
+    else{
+      break
+    }
+  }
 }
 
 ($data = readJson '.\output3.json') `
   | readEvents `
-  | postStream
+  | postToStream
