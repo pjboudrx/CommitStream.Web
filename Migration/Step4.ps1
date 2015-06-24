@@ -61,21 +61,23 @@ function invokeRequest {
       -Headers @{ 'Authorization' = (getAuthorizationHeader $esUsr $esPassword) } `
       -ContentType 'application/vnd.eventstore.events+json' `
       -URI $uri `
-      -TimeoutSec 30 `
       -Method Post `
       -Insecure `
       -Body $body
   }
+  Catch [System.ArgumentException]{
+  }
   Catch{
-    Write-Host $_.Exception.Message
+    Write-Host $_.Exception | format-list -force
     $retry++
-    if($retry -lt 3){
+    if($retry -lt 6){
       Write-Host "Retry number $retry"
       invokeRequest $uri $body $retry
     }
     else{
+      #TODO: save it into a file
       Write-Host $body
-      break
+      # break
     }
   }
 }
