@@ -47,6 +47,7 @@ function postToStream {
 
       $currentUri = "$esUrl/streams/inboxCommits-$streamName"
       Write-Host $currentUri
+      Write-Host $body.eventId
 
       invokeRequest $currentUri $json 0
     }
@@ -64,7 +65,6 @@ function invokeRequest {
       -Method Post `
       -Insecure `
       -Body $body
-      throw 'meh'
   }
   Catch{
     Write-Host $_.Exception.Message
@@ -74,6 +74,7 @@ function invokeRequest {
       invokeRequest $uri $body $retry
     }
     else{
+      Write-Host $body
       break
     }
   }
