@@ -75,7 +75,7 @@ function invokeRequest {
       invokeRequest $uri $body $retry
     }
     else{
-      #TODO: save it into a file
+      Add-Content "fails.json" "`n $body" 
       Write-Host $body
       # break
     }
