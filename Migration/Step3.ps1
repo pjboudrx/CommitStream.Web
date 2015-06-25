@@ -1,5 +1,5 @@
 . '.\Common.ps1'
-
+# create a new instance manually and set the next two variables
 $instanceId = ''
 $apiKey = ''
 
@@ -31,7 +31,7 @@ function createDigests {
         -Insecure
 
         $_.Value | Add-Member @{ 'newDigestId' =  $r.digestId }
-        $trUrl = "$BASEURL/api/$instanceId/digests/$($r.digestId)/commits?apiKey=$apiKey"
+        $trUrl = "$BASEURL/index.html?instanceId=$instanceId&digestId=$($r.digestId)&apiKey=$apiKey"
         $_.Value | Add-Member @{ 'teamRoomUrl' = $trUrl }
         $_.Value.created = $true
     }

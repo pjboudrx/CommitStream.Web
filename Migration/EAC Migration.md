@@ -1,18 +1,22 @@
-## EAC Migration ##
+# EAC Migration #
 
-### Guidelines ###
+### The plan ###
 * Don't do the import all at once so in case of failure we can redo just that particular step.
 * Do one customer at a time.
-* Make a backup of the ES cluster before any import.
+* Stop all 3 production nodes.
+* Back up the data folder in one of the nodes before any import.
+* Start the 3 nodes once more.
+* Start the migration process (**See Four main steps**).
+* For each EAC we will need: 
+	* CommitStream apiKey and url. 
+	* EventStore url, username and password.
 
 ###Four main steps###
 
-```TODO: UPDATE THIS```
-
-1. Read from CS API so we can know the structure of the digests and inboxes.
-2. Make use of the previous information so we can read from each stream directly from ES. We should save the events of each stream in separated files. We could name the files with some convention (inboxId.events.js).
-3. Import the previously retrieved events into the new ES instance.
-4. 
+1. Read from EAC CS API so we can know the structure of the digests and inboxes.
+2. Make use of the previous information so we can read from each stream directly from ES. We should save the events of each stream in separated files. The convention for the files should be digestId.js.
+3. Create a new instance in the production CS. Recreate digests and inboxes.
+4. Import the previously retrieved events into the ES production instance.
 
 
 ####Step 1####
@@ -65,10 +69,10 @@ We are grouping by digest so natural insertion order is maintained.
 
 ####Step 3####
 
-* Create instance per EAC (manually since we are only migrating one EAC at a time).
+* Create instance per EAC (manually since we are only migrating one EAC at a time). From the response extract the instanceId and apiKey.
 * Read the JSON once more and based on it create the digests and inboxes.
 * Save the the new digests and inboxes ids on the JSON object.
-* TODO: Save the new inbox URL in the JSON file so we can inform the customers. 
+* Save the new webhook and teamroom URLs in the JSON object so we can inform the customers. 
 
 ####Step 4####
 * Start importing the events one stream/digest at a time.
