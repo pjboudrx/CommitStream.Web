@@ -31,7 +31,7 @@ function createDigests {
         -Insecure
 
         $_.Value | Add-Member @{ 'newDigestId' =  $r.digestId }
-        $trUrl = "$BASEURL/index.html?instanceId=$instanceId&digestId=$($r.digestId)&apiKey=$apiKey"
+        $trUrl = "$BASEURL/?instanceId=$instanceId&digestId=$($r.digestId)&apiKey=$apiKey"
         $_.Value | Add-Member @{ 'teamRoomUrl' = $trUrl }
         $_.Value.created = $true
     }
