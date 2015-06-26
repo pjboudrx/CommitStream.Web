@@ -75,4 +75,5 @@ We are grouping by digest so natural insertion order is maintained.
 * Save the new webhook and teamroom URLs in the JSON object so we can inform the customers. 
 
 ####Step 4####
-* Start importing the events one stream/digest at a time.
+* Start importing the events one at a time and also one stream/digest at a time.
+* For each post there is a given number of retries in case of failure. If that number is exceeded the event is saved in a file named fails.json.
