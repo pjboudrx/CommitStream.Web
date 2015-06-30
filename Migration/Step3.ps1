@@ -31,7 +31,9 @@ function createDigests {
         -TimeoutSec 30 `
         -Insecure
 
-        $_.Value | Add-Member @{ 'newDigestId' =  $r.digestId }
+        $_.Value | Add-Member @{ 'newDigestId' = $r.digestId }
+        $_.Value | Add-Member @{ 'inboxCreate' = "$($r._links.'inbox-create'.href)?apiKey=$apiKey" }
+
         $trUrl = "$BASEURL/?instanceId=$instanceId&digestId=$($r.digestId)&apiKey=$apiKey"
         $_.Value | Add-Member @{ 'teamRoomUrl' = $trUrl }
         $_.Value.created = $true
