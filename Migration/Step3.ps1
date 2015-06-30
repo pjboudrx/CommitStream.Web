@@ -10,6 +10,7 @@ function createDigests {
   param([Parameter(ValueFromPipeline=$true)]$input)
 
   $input | Add-Member @{ 'instanceId' = $instanceId }
+  $input | Add-Member @{ 'apiKey' = $apiKey }
 
   $input.digests.PSObject.Properties | % {
     $body = @{}
@@ -18,7 +19,7 @@ function createDigests {
     $json = $body | ConvertTo-Json
 
     $_.Value | Add-Member @{ 'created' =  $false }
-    $_.Value | Add-Member @{ 'inboxesDictionary' =  @{} }
+    $_.Value | Add-Member @{ 'inboxesDictionary' = @{} }
 
     Try{
       $r = Invoke-RestMethod `
