@@ -47,9 +47,9 @@ function instanceTest(testCase, it) {
   it(testCase.name, async function(done) {
     try {
       let instance = await post('/instances', testCase.instance);
-      let digest = await postToLink2(instance, 'digest-create', testCase.digest);
-      let inbox = await postToLink2(digest, 'inbox-create', testCase.inbox);
-      let addCommitResponse = await postToLink2(inbox, 'add-commit', testCase.commits, {'x-github-event': 'push'});
+      let digest = await postToLink(instance, 'digest-create', testCase.digest);
+      let inbox = await postToLink(digest, 'inbox-create', testCase.inbox);
+      let addCommitResponse = await postToLink(inbox, 'add-commit', testCase.commits, {'x-github-event': 'push'});
 
       addCommitResponse.message.should.equal(testCase.expectedMessage);
       console.log('```json\n' + JSON.stringify(addCommitResponse.message, ' ', 2) + '\n```\n\n');
