@@ -42,12 +42,14 @@
     "validator": "^3.22.1"
   },
   "devDependencies": {
+    "babel": "^5.8.20",
     "traceur": "^0.0.66"
   },
   "scripts": {
     "start": "node server.js",
     "test": "mocha -u exports -R spec test/**/*tests.js",
     "spike": "mocha -u exports -R spec smoke-test/instance-support.tests.js",
+    "spike67": "mocha --compilers js:babel/register -u exports -R spec smoke-test/isp.67.js",
     "smoke": "mocha -u exports -R spec smoke-test/**/*tests.js",
     "smoke-happy-path": "mocha -u exports -R spec smoke-test/happy-path-end-to-end.tests.js",
     "jenkins-test": "mocha -u exports -R tap test/**/*tests.js",

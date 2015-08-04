@@ -44,30 +44,32 @@ var testCases = [{
 // TODO use Chai as Promised to finish this...
 
 function instanceTest(testCase, it) {
-  it(testCase.name, function(done) {
-    post('/instances', testCase.instance)
-      .then(postToLink('digest-create', testCase.digest))
-      .then(postToLink('inbox-create', testCase.inbox))
-      .then(postToLink('add-commit', testCase.commits, {
-        'x-github-event': 'push'
-      }))
-      .then(function(addCommitResponse) {
-        addCommitResponse.message.should.equal(testCase.expectedMessage);
-        console.log('```json\n' + JSON.stringify(addCommitResponse.message, ' ', 2) + '\n```\n\n');
-        var queryLink = getLink(addCommitResponse, "instance-query");
-        queryLink = get(queryLink.replace(":workitems", testCase.workItemToQueryFor) + '?apiKey=' + getApiKey(), true);
-        return rp(queryLink);
-      })
-      .then(function(queryResponse) {
-        console.log('```json\n' + JSON.stringify(queryResponse, ' ', 2) + '\n```\n\n');
-        var firstMessage = queryResponse.commits[0].message;
-        firstMessage.should.equal(testCase.commits.commits[0].message);
-        console.log("Here is the first commit:");
-        console.log(firstMessage);
-        console.log("\n");
-      })
-      .catch(console.error)
-      .finally(done);
+  it(testCase.name, async function(done) {
+    try {
+      let instance = await post('/instances', testCase.instance);
+      let digest = await postToLink2(instance, 'digest-create', testCase.digest);
+      let inbox = await postToLink2(digest, 'inbox-create', testCase.inbox);
+      let addCommitResponse = await postToLink2(inbox, 'add-commit', testCase.commits, {'x-github-event': 'push'});
+
+      addCommitResponse.message.should.equal(testCase.expectedMessage);
+      console.log('```json\n' + JSON.stringify(addCommitResponse.message, ' ', 2) + '\n```\n\n');
+
+      let queryLink = getLink(addCommitResponse, "instance-query");
+      queryLink = get(queryLink.replace(":workitems", testCase.workItemToQueryFor) + '?apiKey=' + getApiKey(), true);
+      let queryResponse = await rp(queryLink);
+      console.log('```json\n' + JSON.stringify(queryResponse, ' ', 2) + '\n```\n\n');
+
+      var firstMessage = queryResponse.commits[0].message;
+      firstMessage.should.equal(testCase.commits.commits[0].message);
+      console.log("Here is the first commit:");
+      console.log(firstMessage);
+      console.log("\n");
+    } catch (err) {
+      console.error("Caught an error:");
+      console.error(err);
+    } finally {
+      done();
+    }
   });
 }
 

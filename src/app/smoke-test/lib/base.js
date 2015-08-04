@@ -64,30 +64,28 @@
 
   var loggingSeparator = '<hr/>';
 
-  function postToLink(linkName, data, extraHeaders) {
-    return function(halResponse) {
-      if (LOGGING) {
-        console.log('After getting this HAL response:\n\n');
-        console.log('```json\n' + JSON.stringify(halResponse, ' ', 2) + '\n```\n\n');
-        if (halResponse._links['teamroom-view']) {
-          console.log('TEAMROOM LINK:');
-          console.log(halResponse._links['teamroom-view'].href + '&apiKey=' + getApiKey());
-        }
-
+  function postToLink(halResponse, linkName, data, extraHeaders) {
+    if (LOGGING) {
+      console.log('After getting this HAL response:\n\n');
+      console.log('```json\n' + JSON.stringify(halResponse, ' ', 2) + '\n```\n\n');
+      if (halResponse._links['teamroom-view']) {
+        console.log('TEAMROOM LINK:');
+        console.log(halResponse._links['teamroom-view'].href + '&apiKey=' + getApiKey());
       }
-      if (halResponse.apiKey) apiKey = halResponse.apiKey; // Cheap n dirty
-      var link = getLink(halResponse, linkName);
-      if (apiKey !== null) link += "?apiKey=" + apiKey;
+    }
+    if (halResponse.apiKey) apiKey = halResponse.apiKey; // Cheap n dirty
+    var link = getLink(halResponse, linkName);
+    if (apiKey !== null) link += "?apiKey=" + apiKey;
 
-      if (LOGGING) {
-        console.log('We then extract the `' + linkName + '` link from the `_links` property, returning:\n\n');
-        console.log('`' + link + '`.\n\n');
-        console.log('And then POST the following JSON body to that link:\n\n');
-        console.log('```json\n' + JSON.stringify(data, ' ', 2) + '\n```\n\n');
-        console.log(loggingSeparator);
-      }
-      return rp(postOptions(link, data, extraHeaders));
-    };
+    if (LOGGING) {
+      console.log('We then extract the `' + linkName + '` link from the `_links` property, returning:\n\n');
+      console.log('`' + link + '`.\n\n');
+      console.log('And then POST the following JSON body to that link:\n\n');
+      console.log('```json\n' + JSON.stringify(data, ' ', 2) + '\n```\n\n');
+      console.log(loggingSeparator);
+    }
+    
+    return rp(postOptions(link, data, extraHeaders));    
   }
 
   /* TODO
