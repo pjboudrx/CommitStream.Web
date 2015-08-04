@@ -35,6 +35,7 @@
 }
 */
 
+
 /*
 * Classes : for Translator plugins
 * Arrow functions : for callbacks and small filter type functions
@@ -46,16 +47,14 @@
 * 
 */
 
-'use strict';
-
-(function (gitLabTranslator) {
+(gitLabTranslator => {
   var _ = require('underscore'),
-      uuid = require('uuid-v4'),
-      csError = require('../../middleware/csError');
+    uuid = require('uuid-v4'),
+    csError = require('../../middleware/csError');
 
   // QUESTION: for ES6, can we use the => operator in place of function for the callback, and still
   // have 'this' be what it was??
-  gitLabTranslator.GitLabCommitMalformedError = csError.createCustomError('GitLabCommitMalformedError', function (error, pushEvent) {
+  gitLabTranslator.GitLabCommitMalformedError = csError.createCustomError('GitLabCommitMalformedError', function(error, pushEvent) {
     this.originalError = error;
     var errors = [error.toString()];
     this.pushEvent = pushEvent;
@@ -67,22 +66,19 @@
   //   return true;
   // };
 
-  gitLabTranslator.validate = function (req) {
-    return true;
-  };
 
-  gitLabTranslator.hasCommits = function (req) {
-    return true;
-  };
+  gitLabTranslator.validate = req => true;
+  
+  gitLabTranslator.hasCommits = req => true;
 
-  gitLabTranslator.respondToNonCommitsMessage = function (req, res) {
+  gitLabTranslator.respondToNonCommitsMessage = (req, res) => {
     // TODO what about this?
     res.json({
       message: 'No GitLab commits found'
-    });
-  };
+    });    
+  };  
 
-  gitLabTranslator.translatePush = function (pushEvent, instanceId, digestId, inboxId) {
+  gitLabTranslator.translatePush = (pushEvent, instanceId, digestId, inboxId) => {
     try {
       var branch = pushEvent.ref.split('/').pop();
       var repository = {
@@ -90,7 +86,7 @@
         name: pushEvent.repository.name
       };
 
-      var events = _.map(pushEvent.commits, function (aCommit) {
+      var events = _.map(pushEvent.commits, aCommit => {
         var commit = {
           sha: aCommit.id,
           commit: {
@@ -127,4 +123,5 @@
       throw otherEx;
     }
   };
-})(module.exports);
+  
+}(module.exports));
