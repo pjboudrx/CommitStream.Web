@@ -102,8 +102,8 @@
             message: aCommit.message
           },
           html_url: aCommit.url,
-          repository: repository,
-          branch: branch,
+          repository,
+          branch,
           originalMessage: aCommit
         };
         return {
@@ -111,9 +111,9 @@
           eventType: 'GitLabCommitReceived',
           data: commit,
           metadata: {
-            instanceId: instanceId,
-            digestId: digestId,
-            inboxId: inboxId
+            instanceId,
+            digestId,
+            inboxId
           }
         };
       });
