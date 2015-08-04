@@ -41,7 +41,8 @@
     "request-promise": "^0.4.2"
   },
   "devDependencies": {
-    "traceur": "^0.0.66"
+    "traceur": "^0.0.66",
+    "babel": "^5.8.20"
   },
   "scripts": {
     "start": "node server.js",
