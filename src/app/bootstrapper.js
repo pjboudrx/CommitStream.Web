@@ -3,7 +3,8 @@
     var _ = require('underscore'),
       path = require('path'),
       fs = require('fs'),
-      EventStore = require('eventstore-client');
+      EventStore = require('eventstore-client'),
+      logger = require('./middleware/logger');
 
     var es = new EventStore({
       baseUrl: config.eventStoreBaseUrl,
@@ -11,23 +12,23 @@
       password: config.eventStorePassword
     });
 
-    console.log('Enabling system projections...');
+    logger.info('Enabling system projections...');
     es.projection.enableSystemAll(function() {});
 
-    console.log('Looking for already existing projections...');
+    logger.info('Looking for already existing projections...');
     es.projections.get(function(error, response) {
       initProjections(JSON.parse(response.body));
     });
 
     function initProjections(existingProjections) {
-      console.log('Looking for new projections...');
+      logger.info('Looking for new projections...');
       getLocalProjections(function(item) {
         if (!_.findWhere(existingProjections.projections, {
           effectiveName: item.name
         })) {
           createProjection(item)
         } else {
-          console.log('OK found ' + item.name);
+          logger.info('OK found ' + item.name);
         }
       });
     };
@@ -51,11 +52,11 @@
     function createProjection(projectionObject) {
       es.projections.post(projectionObject, function(error, response) {
         if (error) {
-          console.error('ERROR could not create projection ' + projectionObject.name + ':');
-          console.error(error);
+          logger.error('ERROR could not create projection ' + projectionObject.name + ':');
+          logger.error(error);
         } else {
-          console.log('OK created projection ' + projectionObject.name);
-          console.log(response.body);
+          logger.info('OK created projection ' + projectionObject.name);
+          logger.info(response.body);
         }
       });
     };

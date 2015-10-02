@@ -2,42 +2,7 @@
   var _ = require('underscore'),
     util = require('util'),
     createCustomError = require('custom-error-generator'),
-    bunyan = require('bunyan'),
-    azBunyan = require('az-bunyan');
-
-  // define the target azure storage table name
-  var tableName = 'developingapplogtable';
-
-  // define the connection string to your azure storage account
-  var connectionString = 'DefaultEndpointsProtocol=https;AccountName=commitstreamdev;AccountKey=PBr7JHysuTvIXJwljstuPLmBoVCao/UQvPVqiJQRrfXgAdXAw41hQpXKz1f+fSzQ3niJVMwgTU7fsSA+1esmIA==';
-
-  // initialize the az-bunyan table storage stream
-  var azureStreamInfo = azBunyan.createTableStorageStream('info', {
-    connectionString: connectionString,
-    tableName: tableName
-  });
-  var azureStreamError = azBunyan.createTableStorageStream('error', {
-    connectionString: connectionString,
-    tableName: tableName
-  });
-
-  var logger = bunyan.createLogger({
-    name: "CSError-Logger", // logger name
-    serializers: {
-      req: bunyan.stdSerializers.req, // standard bunyan req serializer
-      err: bunyan.stdSerializers.err // standard bunyan error serializer
-    },
-    streams: [{
-        level: 'info', // loging level
-        stream: process.stdout // log INFO and above to stdout
-      }, {
-        level: 'error', // loging level
-        stream: process.stderr // log INFO and above to stdout
-      },
-      azureStreamInfo,
-      azureStreamError
-    ]
-  });
+    logger = require('./logger');
 
   var UNEXPECTED_ERROR_MSG = 'There was an unexpected error when processing your request.';
 
@@ -70,31 +35,25 @@
   };
 
   csError.errorHandler = function(err, req, res, next) {
-    // logger.info("bunyan logger" + util.inspect(req.route, {
-    //   showHidden: true,
-    //   depth: null
-    // }).substr(0, 5000));
-    logger.info("bunyan logger" + req);
-    var errorMessage = "\nEXCEPTION RAISED BY API ROUTE: " + util.inspect(req.route, {
-      showHidden: true,
-      depth: null
-    }).substr(0, 5000)
-    + "\nURL: " + util.inspect(req.originalUrl)
-    + "\nHEADERS:\n" + util.inspect(req.headers, {
-      showHidden: true,
-      depth: null
-    })
-    + "\nBODY:\n" + util.inspect(req.body, {
-      showHidden: true,
-      depth: null
-    })
-    + "\nSTACK TRACE:\n"
-    + err.stack
-    + "\nCAUGHT ERROR DETAILS:\n"
-    + util.inspect(err, {
-      showHidden: true,
-      depth: null
-    }).substr(0, 5000);
+    var errorMessage = {
+      level: 'error',
+      msg: {
+        route: req.route.path,
+        url: util.inspect(req.originalUrl),
+          headers: util.inspect(req.headers, {
+          showHidden: true,
+          depth: null
+        }),
+        body: req.body,
+        stackTrace: err.stack,
+        exception: util.inspect(err, {
+          showHidden: true,
+          depth: null
+        }).substr(0, 5000),
+        internalMessage: ''
+      },
+      meta: ''
+    };
 
     function sendError(error) {
       res.status(error.statusCode).json(error.errors);
@@ -103,12 +62,14 @@
     if (err instanceof CSError) {
       sendError(err);
       if (err.internalMessage !== null) {
-        errorMessage += "\nINTERNAL MESSAGE:\n" + err.internalMessage;
+        errorMessage.msg.internalMessage = err.internalMessage;
       }
-      logger.error(errorMessage);
+      errorMessage.msg.status = err.statusCode;
+      logger.error(JSON.stringify(errorMessage));
     } else {
       sendError(csError([UNEXPECTED_ERROR_MSG], 500));
-      logger.error(errorMessage);
+      errorMessage.msg.status = 500;
+      logger.error(JSON.stringify(errorMessage));
     }
   };
 
