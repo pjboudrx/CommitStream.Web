@@ -37,23 +37,22 @@
   csError.errorHandler = function(err, req, res, next) {
     var errorMessage = {
       level: 'error',
-      msg: {
-        route: req.route.path,
-        url: util.inspect(req.originalUrl),
-          headers: util.inspect(req.headers, {
-          showHidden: true,
-          depth: null
-        }),
-        body: req.body,
-        stackTrace: err.stack,
-        exception: util.inspect(err, {
-          showHidden: true,
-          depth: null
-        }).substr(0, 5000),
-        internalMessage: ''
-      },
-      meta: ''
+      route: req.route.path,
+      url: util.inspect(req.originalUrl),
+        headers: util.inspect(req.headers, {
+        showHidden: true,
+        depth: null
+      }),
+      body: req.body,
+      stackTrace: err.stack,
+      exception: util.inspect(err, {
+        showHidden: true,
+        depth: null
+      }).substr(0, 5000),
+      internalMessage: ''
     };
+
+    "level", "status", "route", "url", "internalMessage", "exception", "body", "stackTrace"
 
     function sendError(error) {
       res.status(error.statusCode).json(error.errors);
@@ -62,13 +61,13 @@
     if (err instanceof CSError) {
       sendError(err);
       if (err.internalMessage !== null) {
-        errorMessage.msg.internalMessage = err.internalMessage;
+        errorMessage.internalMessage = err.internalMessage;
       }
-      errorMessage.msg.status = err.statusCode;
+      errorMessage.status = err.statusCode;
       logger.error(JSON.stringify(errorMessage));
     } else {
       sendError(csError([UNEXPECTED_ERROR_MSG], 500));
-      errorMessage.msg.status = 500;
+      errorMessage.status = 500;
       logger.error(JSON.stringify(errorMessage));
     }
   };
