@@ -45,26 +45,19 @@ let createInbox = R.curry(async(iteration, digest) => {
 });
 
 let createMessage = (mention, inbox) => {
-  let message = `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
+  return `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
 }
 
-let createCommits = R.curry(async(mentions, inbox) => {
-  mentions.forEach(async(v, k, map) => {
-    let message = createMessage(k, inbox);
-    let commitAddResponse = await inbox.commitCreate(message);
+let createCommit = async(message, inbox) => {
+  let commitAddResponse = await inbox.commitCreate(message);
+  if (program.debug) {
+    console.log(commitAddResponse.message);
+  }
+}
 
-    if (program.debug) {
-      console.log(commitAddResponse.message);
-    }
-
-    v.forEach(async(v, i, array) => {
-      let message = `${k} ${v} in  ${inbox.inboxId} of family = ${inbox.family}`;
-      let commitAddResponse = await inbox.commitCreate(message);
-
-      if (program.debug) {
-        console.log(commitAddResponse.message);
-      }
-    });
+let mapMentions = R.curry(async(mentions, functor, inbox) => {
+  mentions.forEach(async(v, k) => {
+    functor(k, v, inbox);
   });
 });
 
@@ -138,15 +131,26 @@ let run = async() => {
   if (program.json) console.log('[');
 
   if (program.sample) {
-    let iteration = (new Date()).toGMTString();
+    try {
+      let iteration = (new Date()).toGMTString();
 
-    let createInstanceWithSampleData = R.pipeP(
-      createInstanceAndDigest,
-      createInbox(iteration),
-      createCommits(realMentions)
-    );
+      let createInstanceWithSampleData = R.pipeP(
+        createInstanceAndDigest,
+        createInbox(iteration),
+        mapMentions(realMentions, async(k, v, inbox) => {
+          let message = createMessage(k, inbox);
+          createCommit(message, inbox);          
+          v.forEach(async(e, i) => {
+            let message = createMessage(`${k} ${e}`, inbox)
+            createCommit(message, inbox);
+          });
+        })
+      );
 
-    await createInstanceWithSampleData(iteration);
+      await createInstanceWithSampleData(iteration);
+    } catch (error) {
+      console.log(error);
+    }
   } else {
     for (let instanceNum = 0; instanceNum < number_of_instances; instanceNum++) {
       await createInstanceWithFakeData(instanceNum);
