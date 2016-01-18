@@ -2,6 +2,7 @@
 
 import program from 'commander';
 import CSApiClient from './lib/cs-api-client';
+import R from 'ramda';
 
 program
   .version('0.0.0')
@@ -22,15 +23,7 @@ let client = new CSApiClient(program.url);
 
 if (!program.json) console.log(`Operating against this CommitStream Service API: ${client.baseUrl}`);
 
-let createInstanceWithSampleData = async(iteration) => {
-  console.log('Creating instance wiht sample data');
-
-  let realMentions = new Map();
-  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
-
+let createInstanceAndDigest = async(iteration) => {
   let instance = await client.instanceCreate();
   let digest = await instance.digestCreate({
     description: `Digest for ${iteration}`
@@ -40,14 +33,24 @@ let createInstanceWithSampleData = async(iteration) => {
     console.log(`The digest: ${digest._links['teamroom-view'].href}&apiKey=${client.apiKey}`);
     console.log(`#${iteration}: Populating instance ${client.instanceId} (apiKey = ${client.apiKey})`);
   }
+  return digest;
+};
 
-  let inbox = await digest.inboxCreate({
+let createInbox = R.curry(async(iteration, digest) => {
+  let inboxToCreate = {
     name: `GitHub Repo ${iteration}`,
     family: 'GitHub'
-  });
+  };
+  return await digest.inboxCreate(inboxToCreate)
+});
 
-  realMentions.forEach(async(v, k, map) => {
-    let message = `${k} in  ${inbox.inboxId} of family = ${inbox.family}`;
+let createMessage = (mention, inbox) => {
+  let message = `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
+}
+
+let createCommits = R.curry(async(mentions, inbox) => {
+  mentions.forEach(async(v, k, map) => {
+    let message = createMessage(k, inbox);
     let commitAddResponse = await inbox.commitCreate(message);
 
     if (program.debug) {
@@ -61,11 +64,18 @@ let createInstanceWithSampleData = async(iteration) => {
       if (program.debug) {
         console.log(commitAddResponse.message);
       }
-
     });
-
   });
-};
+});
+
+//  console.log('Creating instance with sample data');
+
+let realMentions = new Map();
+realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
+realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
+realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
+realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
+
 
 let createInstanceWithFakeData = async(iteration) => {
   let inboxesToCreate = [{
@@ -126,8 +136,17 @@ let createInstanceWithFakeData = async(iteration) => {
 
 let run = async() => {
   if (program.json) console.log('[');
+
   if (program.sample) {
-    await createInstanceWithSampleData((new Date()).toGMTString());
+    let iteration = (new Date()).toGMTString();
+
+    let createInstanceWithSampleData = R.pipeP(
+      createInstanceAndDigest,
+      createInbox(iteration),
+      createCommits(realMentions)
+    );
+
+    await createInstanceWithSampleData(iteration);
   } else {
     for (let instanceNum = 0; instanceNum < number_of_instances; instanceNum++) {
       await createInstanceWithFakeData(instanceNum);

@@ -31,6 +31,7 @@
     "node-mocks-http": "^1.4.1",
     "octonode": "^0.6.9",
     "proxyquire": "^1.0.1",
+    "ramda": "^0.19.1",
     "request": "^2.44.0",
     "request-json": "^0.4.13",
     "request-promise": "^0.4.2",

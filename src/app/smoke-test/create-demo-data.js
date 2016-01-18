@@ -8,7 +8,7 @@ var _getIterator = require('babel-runtime/core-js/get-iterator')['default'];
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
-var _this3 = this;
+var _this = this;
 
 var _commander = require('commander');
 
@@ -17,6 +17,10 @@ var _commander2 = _interopRequireDefault(_commander);
 var _libCsApiClient = require('./lib/cs-api-client');
 
 var _libCsApiClient2 = _interopRequireDefault(_libCsApiClient);
+
+var _ramda = require('ramda');
+
+var _ramda2 = _interopRequireDefault(_ramda);
 
 _commander2['default'].version('0.0.0').option('-u, --url [url]', 'The base URL for the CommitStream Service API, default: http://localhost:6565/api', 'http://localhost:6565/api').option('-i, --instances [number]', 'Number of instances to create, default: 1', 1).option('-r, --repos [number]', 'Number of repos creation iterations to run (creates one repo per family type during each iteration), default 1', 1).option('-m, --mentions [number]', 'Number of times to post a commit with each mention (one story, 5 tasks, 5 tests in each group of workitems), default 1', 1).option('-d, --debug', 'Show results of each commit, not just summary information').option('-j, --json', 'Log only the JSON output with all the query URLs needed for the performance client').option('-s, --sample', 'Create the commits with sample data that exists in the PR builds', 0).parse(process.argv);
 
@@ -28,57 +32,77 @@ var client = new _libCsApiClient2['default'](_commander2['default'].url);
 
 if (!_commander2['default'].json) console.log('Operating against this CommitStream Service API: ' + client.baseUrl);
 
-var createInstanceWithSampleData = function createInstanceWithSampleData(iteration) {
-  var realMentions, instance, digest, inbox;
-  return _regeneratorRuntime.async(function createInstanceWithSampleData$(context$1$0) {
-    var _this2 = this;
-
+var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
+  var instance, digest;
+  return _regeneratorRuntime.async(function createInstanceAndDigest$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        console.log('Creating instance wiht sample data');
-
-        realMentions = new _Map();
-
-        realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-        realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-        realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-        realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
-
-        context$1$0.next = 8;
+        context$1$0.next = 2;
         return _regeneratorRuntime.awrap(client.instanceCreate());
 
-      case 8:
+      case 2:
         instance = context$1$0.sent;
-        context$1$0.next = 11;
+        context$1$0.next = 5;
         return _regeneratorRuntime.awrap(instance.digestCreate({
           description: 'Digest for ' + iteration
         }));
 
-      case 11:
+      case 5:
         digest = context$1$0.sent;
 
         if (!_commander2['default'].json) {
           console.log('The digest: ' + digest._links['teamroom-view'].href + '&apiKey=' + client.apiKey);
           console.log('#' + iteration + ': Populating instance ' + client.instanceId + ' (apiKey = ' + client.apiKey + ')');
         }
+        return context$1$0.abrupt('return', digest);
 
-        context$1$0.next = 15;
-        return _regeneratorRuntime.awrap(digest.inboxCreate({
+      case 8:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
+
+var createInbox = _ramda2['default'].curry(function callee$0$0(iteration, digest) {
+  var inboxToCreate;
+  return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        inboxToCreate = {
           name: 'GitHub Repo ' + iteration,
           family: 'GitHub'
-        }));
+        };
+        context$1$0.next = 3;
+        return _regeneratorRuntime.awrap(digest.inboxCreate(inboxToCreate));
 
-      case 15:
-        inbox = context$1$0.sent;
+      case 3:
+        return context$1$0.abrupt('return', context$1$0.sent);
 
-        realMentions.forEach(function callee$1$0(v, k, map) {
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+});
+
+var createMessage = function createMessage(mention, inbox) {
+  var message = mention + ' in  ' + inbox.inboxId + ' of family = ' + inbox.family;
+};
+
+var createCommits = _ramda2['default'].curry(function callee$0$0(mentions, inbox) {
+  return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
+    var _this3 = this;
+
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        mentions.forEach(function callee$1$0(v, k, map) {
           var message, commitAddResponse;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            var _this = this;
+            var _this2 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                message = k + ' in  ' + inbox.inboxId + ' of family = ' + inbox.family;
+                message = createMessage(k, inbox);
                 context$2$0.next = 3;
                 return _regeneratorRuntime.awrap(inbox.commitCreate(message));
 
@@ -109,22 +133,30 @@ var createInstanceWithSampleData = function createInstanceWithSampleData(iterati
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this);
+                  }, null, _this2);
                 });
 
               case 6:
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this2);
+          }, null, _this3);
         });
 
-      case 17:
+      case 1:
       case 'end':
         return context$1$0.stop();
     }
-  }, null, _this3);
-};
+  }, null, _this);
+});
+
+//  console.log('Creating instance with sample data');
+
+var realMentions = new _Map();
+realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
+realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
+realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
+realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
 
 var createInstanceWithFakeData = function createInstanceWithFakeData(iteration) {
   var inboxesToCreate, workItemsToMention, instance, digest, n, inboxNum, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, inboxToCreate, inbox, workItemGroupNum, workItemsGroup, comma, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, workItem, mentionNum, message, commitAddResponse;
@@ -324,53 +356,55 @@ var createInstanceWithFakeData = function createInstanceWithFakeData(iteration) 
       case 'end':
         return context$1$0.stop();
     }
-  }, null, _this3, [[15, 66, 70, 78], [30, 49, 53, 61], [54,, 56, 60], [71,, 73, 77]]);
+  }, null, _this, [[15, 66, 70, 78], [30, 49, 53, 61], [54,, 56, 60], [71,, 73, 77]]);
 };
 
 var run = function run() {
-  var instanceNum;
+  var iteration, createInstanceWithSampleData, instanceNum;
   return _regeneratorRuntime.async(function run$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         if (_commander2['default'].json) console.log('[');
 
         if (!_commander2['default'].sample) {
-          context$1$0.next = 6;
+          context$1$0.next = 8;
           break;
         }
 
-        context$1$0.next = 4;
-        return _regeneratorRuntime.awrap(createInstanceWithSampleData(new Date().toGMTString()));
-
-      case 4:
-        context$1$0.next = 13;
-        break;
+        iteration = new Date().toGMTString();
+        createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, createInbox(iteration), createCommits(realMentions));
+        context$1$0.next = 6;
+        return _regeneratorRuntime.awrap(createInstanceWithSampleData(iteration));
 
       case 6:
+        context$1$0.next = 15;
+        break;
+
+      case 8:
         instanceNum = 0;
 
-      case 7:
+      case 9:
         if (!(instanceNum < number_of_instances)) {
-          context$1$0.next = 13;
+          context$1$0.next = 15;
           break;
         }
 
-        context$1$0.next = 10;
+        context$1$0.next = 12;
         return _regeneratorRuntime.awrap(createInstanceWithFakeData(instanceNum));
 
-      case 10:
+      case 12:
         instanceNum++;
-        context$1$0.next = 7;
+        context$1$0.next = 9;
         break;
 
-      case 13:
+      case 15:
         if (_commander2['default'].json) console.log(']');
 
-      case 14:
+      case 16:
       case 'end':
         return context$1$0.stop();
     }
-  }, null, _this3);
+  }, null, _this);
 };
 
 try {
