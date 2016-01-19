@@ -29,7 +29,6 @@ var number_of_repo_iterations = parseInt(_commander2['default'].repos);
 var number_of_mentions_per_workitem_per_repo = parseInt(_commander2['default'].mentions);
 
 var client = new _libCsApiClient2['default'](_commander2['default'].url);
-var inboxesToCreate = [];
 
 if (!_commander2['default'].json) console.log('Operating against this CommitStream Service API: ' + client.baseUrl);
 
@@ -55,7 +54,10 @@ var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
           console.log('The digest: ' + digest._links['teamroom-view'].href + '&apiKey=' + client.apiKey);
           console.log('#' + iteration + ': Populating instance ' + client.instanceId + ' (apiKey = ' + client.apiKey + ')');
         }
-        return context$1$0.abrupt('return', digest);
+
+        return context$1$0.abrupt('return', {
+          instance: instance, digest: digest
+        });
 
       case 8:
       case 'end':
@@ -64,27 +66,28 @@ var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
   }, null, _this);
 };
 
-var createInbox = _ramda2['default'].curry(function callee$0$0(iteration, digest) {
-  var inboxToCreate;
-  return _regeneratorRuntime.async(function callee$0$0$(context$1$0) {
+var createInbox = function createInbox(dto) {
+  var iteration, inboxToCreate;
+  return _regeneratorRuntime.async(function createInbox$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
+        iteration = dto.iteration;
         inboxToCreate = {
           name: 'GitHub Repo ' + iteration,
           family: 'GitHub'
         };
-        context$1$0.next = 3;
-        return _regeneratorRuntime.awrap(digest.inboxCreate(inboxToCreate));
-
-      case 3:
-        return context$1$0.abrupt('return', context$1$0.sent);
+        context$1$0.next = 4;
+        return _regeneratorRuntime.awrap(dto.digest.inboxCreate(inboxToCreate));
 
       case 4:
+        return context$1$0.abrupt('return', context$1$0.sent);
+
+      case 5:
       case 'end':
         return context$1$0.stop();
     }
   }, null, _this);
-});
+};
 
 var createSampleCommits = function createSampleCommits(inbox) {
   var realMentions;
@@ -168,10 +171,12 @@ var createCommit = function createCommit(message, inbox) {
   }, null, _this);
 };
 
-var getInboxesToCreate = function getInboxesToCreate(iteration) {
+var getInboxesToCreate = function getInboxesToCreate(dto) {
+  var iteration, inboxesToCreate;
   return _regeneratorRuntime.async(function getInboxesToCreate$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
+        iteration = dto.iteration;
         inboxesToCreate = [{
           name: 'GitHub Repo ' + iteration,
           family: 'GitHub'
@@ -185,9 +190,11 @@ var getInboxesToCreate = function getInboxesToCreate(iteration) {
           name: 'VsoGit Repo ' + iteration,
           family: 'VsoGit'
         }];
-        return context$1$0.abrupt('return', iteration);
 
-      case 2:
+        dto.inboxesToCreate = inboxesToCreate;
+        return context$1$0.abrupt('return', dto);
+
+      case 4:
       case 'end':
         return context$1$0.stop();
     }
@@ -196,14 +203,15 @@ var getInboxesToCreate = function getInboxesToCreate(iteration) {
 
 var workItemsToMention = [['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'], ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'], ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'], ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']];
 
-var createInboxes = function createInboxes(digest) {
-  var inboxNum;
+var createInboxes = function createInboxes(dto) {
+  var inboxNum, digest;
   return _regeneratorRuntime.async(function createInboxes$(context$1$0) {
     var _this6 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         inboxNum = 0;
+        digest = dto.digest;
 
         _ramda2['default'].map(function callee$1$0(iteration) {
           var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2;
@@ -219,7 +227,7 @@ var createInboxes = function createInboxes(digest) {
                 context$2$0.prev = 3;
 
                 _loop = function callee$2$0() {
-                  var inboxToCreate, inbox, workItemGroupNum, workItemsGroup, comma, _loop2;
+                  var inboxToCreate, inbox, workItemsGroup, comma, _loop2;
 
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
                     var _this4 = this;
@@ -232,19 +240,19 @@ var createInboxes = function createInboxes(digest) {
 
                       case 3:
                         inbox = context$3$0.sent;
-                        workItemGroupNum = inboxNum % 4;
-                        workItemsGroup = workItemsToMention[workItemGroupNum];
+                        workItemsGroup = workItemsToMention[inboxNum % 4];
                         comma = iteration === 0 && inboxNum === 0 ? '' : ',';
 
                         inboxNum++;
-                        // if (!program.json) {
-                        //   console.log(`Adding commits to ${inbox.inboxId} of family ${inbox.family}`);
-                        //   console.log(`${inbox._links['add-commit'].href}?apiKey=${client.apiKey}`);
-                        // } else console.log(`${comma}"${client.baseUrl}/${client.instanceId}/commits/tags/versionone/workitem?numbers=${workItemsGroup.join(',')}&apiKey=${client.apiKey}"`);
+                        dto.inbox = inbox;
+                        if (!_commander2['default'].json) {
+                          console.log('Adding commits to ' + inbox.inboxId + ' of family ' + inbox.family);
+                          console.log(inbox._links['add-commit'].href + '?apiKey=' + client.apiKey);
+                        } else console.log(comma + '"' + client.baseUrl + '/' + client.instanceId + '/commits/tags/versionone/workitem?numbers=' + workItemsGroup.join(',') + '&apiKey=' + client.apiKey + '"');
                         _iteratorNormalCompletion2 = true;
                         _didIteratorError2 = false;
                         _iteratorError2 = undefined;
-                        context$3$0.prev = 11;
+                        context$3$0.prev = 12;
 
                         _loop2 = function () {
                           var workItem = _step2.value;
@@ -269,47 +277,47 @@ var createInboxes = function createInboxes(digest) {
                         for (_iterator2 = _getIterator(workItemsGroup); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                           _loop2();
                         }
-                        context$3$0.next = 20;
+                        context$3$0.next = 21;
                         break;
 
-                      case 16:
-                        context$3$0.prev = 16;
-                        context$3$0.t0 = context$3$0['catch'](11);
+                      case 17:
+                        context$3$0.prev = 17;
+                        context$3$0.t0 = context$3$0['catch'](12);
                         _didIteratorError2 = true;
                         _iteratorError2 = context$3$0.t0;
 
-                      case 20:
-                        context$3$0.prev = 20;
+                      case 21:
                         context$3$0.prev = 21;
+                        context$3$0.prev = 22;
 
                         if (!_iteratorNormalCompletion2 && _iterator2['return']) {
                           _iterator2['return']();
                         }
 
-                      case 23:
-                        context$3$0.prev = 23;
+                      case 24:
+                        context$3$0.prev = 24;
 
                         if (!_didIteratorError2) {
-                          context$3$0.next = 26;
+                          context$3$0.next = 27;
                           break;
                         }
 
                         throw _iteratorError2;
 
-                      case 26:
-                        return context$3$0.finish(23);
-
                       case 27:
-                        return context$3$0.finish(20);
+                        return context$3$0.finish(24);
 
                       case 28:
+                        return context$3$0.finish(21);
+
+                      case 29:
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this5, [[11, 16, 20, 28], [21,, 23, 27]]);
+                  }, null, _this5, [[12, 17, 21, 29], [22,, 24, 28]]);
                 };
 
-                _iterator = _getIterator(inboxesToCreate);
+                _iterator = _getIterator(dto.inboxesToCreate);
 
               case 6:
                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
@@ -366,7 +374,7 @@ var createInboxes = function createInboxes(digest) {
           }, null, _this6, [[3, 14, 18, 26], [19,, 21, 25]]);
         }, _ramda2['default'].range(0, number_of_repo_iterations));
 
-      case 2:
+      case 3:
       case 'end':
         return context$1$0.stop();
     }
@@ -374,8 +382,10 @@ var createInboxes = function createInboxes(digest) {
 };
 
 var run = function run() {
-  var iteration, createInstanceWithSampleData;
+  var createInstanceWithSampleData, iteration;
   return _regeneratorRuntime.async(function run$(context$1$0) {
+    var _this7 = this;
+
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         if (_commander2['default'].json) console.log('[');
@@ -386,29 +396,44 @@ var run = function run() {
         }
 
         console.log('Creating instance with sample data');
+        createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, createInbox, createSampleCommits);
         iteration = new Date().toGMTString();
-        createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, createInbox(iteration), createSampleCommits);
         context$1$0.next = 7;
         return _regeneratorRuntime.awrap(createInstanceWithSampleData(iteration));
 
       case 7:
-        context$1$0.next = 10;
+        context$1$0.next = 11;
         break;
 
       case 9:
-        (function () {
+        console.log('Creating instance with fake data');
+        try {
+          (function () {
+            var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
 
-          var createInstanceWithFakeData = _ramda2['default'].pipeP(getInboxesToCreate, createInstanceAndDigest, createInboxes);
+            _ramda2['default'].map(function callee$2$0(instanceNumber) {
+              return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
+                while (1) switch (context$3$0.prev = context$3$0.next) {
+                  case 0:
+                    context$3$0.next = 2;
+                    return _regeneratorRuntime.awrap(createInstanceWithFakeData(instanceNumber));
 
-          _ramda2['default'].map(function (instanceNumber) {
-            createInstanceWithFakeData(instanceNumber);
-          }, _ramda2['default'].range(0, number_of_instances));
-        })();
-
-      case 10:
-        if (_commander2['default'].json) console.log(']');
+                  case 2:
+                  case 'end':
+                    return context$3$0.stop();
+                }
+              }, null, _this7);
+            }, _ramda2['default'].range(0, number_of_instances));
+          })();
+        } catch (e) {
+          // Review exception handling, it seems to be swallowing the errors
+          console.log(e);
+        }
 
       case 11:
+        if (_commander2['default'].json) console.log(']');
+
+      case 12:
       case 'end':
         return context$1$0.stop();
     }

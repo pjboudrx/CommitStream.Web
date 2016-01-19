@@ -20,7 +20,6 @@ const number_of_repo_iterations = parseInt(program.repos);
 const number_of_mentions_per_workitem_per_repo = parseInt(program.mentions);
 
 let client = new CSApiClient(program.url);
-let inboxesToCreate = [];
 
 if (!program.json) console.log(`Operating against this CommitStream Service API: ${client.baseUrl}`);
 
@@ -34,16 +33,20 @@ let createInstanceAndDigest = async(iteration) => {
     console.log(`The digest: ${digest._links['teamroom-view'].href}&apiKey=${client.apiKey}`);
     console.log(`#${iteration}: Populating instance ${client.instanceId} (apiKey = ${client.apiKey})`);
   }
-  return digest;
+
+  return {
+    instance, digest
+  };
 };
 
-let createInbox = R.curry(async(iteration, digest) => {
+let createInbox = async(dto) => {
+  let iteration = dto.iteration;
   let inboxToCreate = {
     name: `GitHub Repo ${iteration}`,
     family: 'GitHub'
   };
-  return await digest.inboxCreate(inboxToCreate)
-});
+  return await dto.digest.inboxCreate(inboxToCreate)
+};
 
 let createSampleCommits = async inbox => {
   let realMentions = new Map();
@@ -73,8 +76,9 @@ let createCommit = async(message, inbox) => {
   }
 }
 
-let getInboxesToCreate = async(iteration) => {
-  inboxesToCreate = [{
+let getInboxesToCreate = async(dto) => {
+  let iteration = dto.iteration
+  let inboxesToCreate = [{
     name: `GitHub Repo ${iteration}`,
     family: 'GitHub'
   }, {
@@ -87,7 +91,8 @@ let getInboxesToCreate = async(iteration) => {
     name: `VsoGit Repo ${iteration}`,
     family: 'VsoGit'
   }];
-  return iteration;
+  dto.inboxesToCreate = inboxesToCreate;
+  return dto;
 }
 
 let workItemsToMention = [
@@ -97,19 +102,21 @@ let workItemsToMention = [
   ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']
 ];
 
-let createInboxes = async(digest) => {
+
+let createInboxes = async(dto) => {
   let inboxNum = 0;
+  let digest = dto.digest;
   R.map(async iteration => {
-    for (let inboxToCreate of inboxesToCreate) {
+    for (let inboxToCreate of dto.inboxesToCreate) {
       let inbox = await digest.inboxCreate(inboxToCreate);
-      let workItemGroupNum = inboxNum % 4;
-      let workItemsGroup = workItemsToMention[workItemGroupNum];
+      let workItemsGroup = workItemsToMention[inboxNum % 4];
       let comma = (iteration === 0 && inboxNum === 0) ? '' : ',';
       inboxNum++;
-      // if (!program.json) {
-      //   console.log(`Adding commits to ${inbox.inboxId} of family ${inbox.family}`);
-      //   console.log(`${inbox._links['add-commit'].href}?apiKey=${client.apiKey}`);
-      // } else console.log(`${comma}"${client.baseUrl}/${client.instanceId}/commits/tags/versionone/workitem?numbers=${workItemsGroup.join(',')}&apiKey=${client.apiKey}"`);
+      dto.inbox = inbox;
+      if (!program.json) {
+        console.log(`Adding commits to ${inbox.inboxId} of family ${inbox.family}`);
+        console.log(`${inbox._links['add-commit'].href}?apiKey=${client.apiKey}`);
+      } else console.log(`${comma}"${client.baseUrl}/${client.instanceId}/commits/tags/versionone/workitem?numbers=${workItemsGroup.join(',')}&apiKey=${client.apiKey}"`);
       for (let workItem of workItemsGroup) {
         R.map(async mentionNum => {
           let message = `${workItem} mention # ${mentionNum} on ${iteration} in  ${inbox.inboxId} of family = ${inbox.family}`;
@@ -125,27 +132,33 @@ let run = async() => {
 
   if (program.sample) {
     console.log('Creating instance with sample data');
-    let iteration = (new Date()).toGMTString();
-
     let createInstanceWithSampleData = R.pipeP(
       createInstanceAndDigest,
-      createInbox(iteration),
+      createInbox,
       createSampleCommits
     );
 
+    let iteration = (new Date()).toGMTString();
     await createInstanceWithSampleData(iteration);
 
   } else {
+    console.log('Creating instance with fake data');
+    try {
+      let createInstanceWithFakeData = R.pipeP(
+        createInstanceAndDigest,
+        getInboxesToCreate,
+        createInboxes
+      );
 
-    let createInstanceWithFakeData = R.pipeP(
-      getInboxesToCreate,
-      createInstanceAndDigest,
-      createInboxes
-    );
+      R.map(async(instanceNumber) => {
+        await createInstanceWithFakeData(instanceNumber);
+      }, R.range(0, number_of_instances));
 
-    R.map((instanceNumber) => {
-      createInstanceWithFakeData(instanceNumber);
-    }, R.range(0, number_of_instances));
+    } catch (e) {
+      // Review exception handling, it seems to be swallowing the errors
+      console.log(e);
+    }
+
   }
   if (program.json) console.log(']');
 }
