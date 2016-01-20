@@ -381,8 +381,12 @@ var createInboxes = function createInboxes(dto) {
   }, null, _this);
 };
 
+var createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, createInbox, createSampleCommits);
+
+var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
+
 var run = function run() {
-  var createInstanceWithSampleData, iteration;
+  var iteration;
   return _regeneratorRuntime.async(function run$(context$1$0) {
     var _this7 = this;
 
@@ -391,49 +395,44 @@ var run = function run() {
         if (_commander2['default'].json) console.log('[');
 
         if (!_commander2['default'].sample) {
-          context$1$0.next = 9;
+          context$1$0.next = 8;
           break;
         }
 
         console.log('Creating instance with sample data');
-        createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, createInbox, createSampleCommits);
         iteration = new Date().toGMTString();
-        context$1$0.next = 7;
+        context$1$0.next = 6;
         return _regeneratorRuntime.awrap(createInstanceWithSampleData(iteration));
 
-      case 7:
-        context$1$0.next = 11;
+      case 6:
+        context$1$0.next = 10;
         break;
 
-      case 9:
+      case 8:
         console.log('Creating instance with fake data');
         try {
-          (function () {
-            var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
+          _ramda2['default'].map(function callee$1$0(instanceNumber) {
+            return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
+              while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                  context$2$0.next = 2;
+                  return _regeneratorRuntime.awrap(createInstanceWithFakeData(instanceNumber));
 
-            _ramda2['default'].map(function callee$2$0(instanceNumber) {
-              return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
-                while (1) switch (context$3$0.prev = context$3$0.next) {
-                  case 0:
-                    context$3$0.next = 2;
-                    return _regeneratorRuntime.awrap(createInstanceWithFakeData(instanceNumber));
-
-                  case 2:
-                  case 'end':
-                    return context$3$0.stop();
-                }
-              }, null, _this7);
-            }, _ramda2['default'].range(0, number_of_instances));
-          })();
+                case 2:
+                case 'end':
+                  return context$2$0.stop();
+              }
+            }, null, _this7);
+          }, _ramda2['default'].range(0, number_of_instances));
         } catch (e) {
           // Review exception handling, it seems to be swallowing the errors
           console.log(e);
         }
 
-      case 11:
+      case 10:
         if (_commander2['default'].json) console.log(']');
 
-      case 12:
+      case 11:
       case 'end':
         return context$1$0.stop();
     }

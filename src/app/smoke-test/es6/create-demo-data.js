@@ -127,29 +127,30 @@ let createInboxes = async(dto) => {
   }, R.range(0, number_of_repo_iterations));
 }
 
+let createInstanceWithSampleData = R.pipeP(
+  createInstanceAndDigest,
+  createInbox,
+  createSampleCommits
+);
+
+let createInstanceWithFakeData = R.pipeP(
+  createInstanceAndDigest,
+  getInboxesToCreate,
+  createInboxes
+);
+
+
 let run = async() => {
   if (program.json) console.log('[');
 
   if (program.sample) {
     console.log('Creating instance with sample data');
-    let createInstanceWithSampleData = R.pipeP(
-      createInstanceAndDigest,
-      createInbox,
-      createSampleCommits
-    );
-
     let iteration = (new Date()).toGMTString();
     await createInstanceWithSampleData(iteration);
 
   } else {
     console.log('Creating instance with fake data');
     try {
-      let createInstanceWithFakeData = R.pipeP(
-        createInstanceAndDigest,
-        getInboxesToCreate,
-        createInboxes
-      );
-
       R.map(async(instanceNumber) => {
         await createInstanceWithFakeData(instanceNumber);
       }, R.range(0, number_of_instances));
