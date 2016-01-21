@@ -66,79 +66,193 @@ var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
   }, null, _this);
 };
 
-var createInbox = function createInbox(dto) {
-  var iteration, inboxToCreate;
-  return _regeneratorRuntime.async(function createInbox$(context$1$0) {
+var getRealMentions = function getRealMentions() {
+  var realMentions = new _Map();
+  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
+  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
+  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
+  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
+  return realMentions;
+};
+
+var createInboxesForSampleData = _regeneratorRuntime.mark(function createInboxesForSampleData(dto) {
+  var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, inboxToCreate;
+
+  return _regeneratorRuntime.async(function createInboxesForSampleData$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        iteration = dto.iteration;
-        inboxToCreate = {
-          name: 'GitHub Repo ' + iteration,
-          family: 'GitHub'
-        };
-        context$1$0.next = 4;
-        return _regeneratorRuntime.awrap(dto.digest.inboxCreate(inboxToCreate));
-
-      case 4:
-        return context$1$0.abrupt('return', context$1$0.sent);
+        _iteratorNormalCompletion = true;
+        _didIteratorError = false;
+        _iteratorError = undefined;
+        context$1$0.prev = 3;
+        _iterator = _getIterator(dto.inboxesToCreate);
 
       case 5:
+        if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+          context$1$0.next = 14;
+          break;
+        }
+
+        inboxToCreate = _step.value;
+        context$1$0.next = 9;
+        return _regeneratorRuntime.awrap(dto.digest.inboxCreate(inboxToCreate));
+
+      case 9:
+        context$1$0.next = 11;
+        return context$1$0.sent;
+
+      case 11:
+        _iteratorNormalCompletion = true;
+        context$1$0.next = 5;
+        break;
+
+      case 14:
+        context$1$0.next = 20;
+        break;
+
+      case 16:
+        context$1$0.prev = 16;
+        context$1$0.t0 = context$1$0['catch'](3);
+        _didIteratorError = true;
+        _iteratorError = context$1$0.t0;
+
+      case 20:
+        context$1$0.prev = 20;
+        context$1$0.prev = 21;
+
+        if (!_iteratorNormalCompletion && _iterator['return']) {
+          _iterator['return']();
+        }
+
+      case 23:
+        context$1$0.prev = 23;
+
+        if (!_didIteratorError) {
+          context$1$0.next = 26;
+          break;
+        }
+
+        throw _iteratorError;
+
+      case 26:
+        return context$1$0.finish(23);
+
+      case 27:
+        return context$1$0.finish(20);
+
+      case 28:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, createInboxesForSampleData, this, [[3, 16, 20, 28], [21,, 23, 27]]);
+});
+
+// :'( https://github.com/zenparsing/async-iteration/
+var getAsyncIteratorElement = function getAsyncIteratorElement(iterator) {
+  var i;
+  return _regeneratorRuntime.async(function getAsyncIteratorElement$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(iterator.next());
+
+      case 2:
+        i = context$1$0.sent;
+        return context$1$0.abrupt('return', i);
+
+      case 4:
       case 'end':
         return context$1$0.stop();
     }
   }, null, _this);
 };
 
-var createSampleCommits = function createSampleCommits(inbox) {
-  var realMentions;
+var createSampleCommits = function createSampleCommits(inboxesAsyncIterator) {
+  var realMentions, inboxElement, _loop;
+
   return _regeneratorRuntime.async(function createSampleCommits$(context$1$0) {
-    var _this3 = this;
+    var _this4 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        realMentions = new _Map();
+        realMentions = getRealMentions();
+        context$1$0.next = 3;
+        return _regeneratorRuntime.awrap(getAsyncIteratorElement(inboxesAsyncIterator));
 
-        realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-        realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-        realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-        realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
+      case 3:
+        inboxElement = context$1$0.sent;
 
-        realMentions.forEach(function callee$1$0(parentValue, parentKey) {
-          var message;
+        _loop = function callee$1$0() {
+          var inbox;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            var _this2 = this;
+            var _this3 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                message = createMessage(parentKey, inbox);
-                context$2$0.next = 3;
-                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+                inbox = inboxElement.value;
 
-              case 3:
-                parentValue.forEach(function callee$2$0(childValue) {
+                realMentions.forEach(function callee$2$0(parentValue, parentKey) {
                   var message;
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
+                    var _this2 = this;
+
                     while (1) switch (context$3$0.prev = context$3$0.next) {
                       case 0:
-                        message = createMessage(parentKey + ' ' + childValue, inbox);
+                        message = createMessage(parentKey, inbox);
                         context$3$0.next = 3;
                         return _regeneratorRuntime.awrap(createCommit(message, inbox));
 
                       case 3:
+                        parentValue.forEach(function callee$3$0(childValue) {
+                          var message;
+                          return _regeneratorRuntime.async(function callee$3$0$(context$4$0) {
+                            while (1) switch (context$4$0.prev = context$4$0.next) {
+                              case 0:
+                                message = createMessage(parentKey + ' ' + childValue, inbox);
+                                context$4$0.next = 3;
+                                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+                              case 3:
+                              case 'end':
+                                return context$4$0.stop();
+                            }
+                          }, null, _this2);
+                        });
+
+                      case 4:
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this2);
+                  }, null, _this3);
                 });
 
+                context$2$0.next = 4;
+                return _regeneratorRuntime.awrap(getAsyncIteratorElement(inboxesAsyncIterator));
+
               case 4:
+                inboxElement = context$2$0.sent;
+
+              case 5:
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this3);
-        });
+          }, null, _this4);
+        };
 
-      case 6:
+      case 5:
+        if (inboxElement.done) {
+          context$1$0.next = 10;
+          break;
+        }
+
+        context$1$0.next = 8;
+        return _regeneratorRuntime.awrap(_loop());
+
+      case 8:
+        context$1$0.next = 5;
+        break;
+
+      case 10:
       case 'end':
         return context$1$0.stop();
     }
@@ -206,7 +320,7 @@ var workItemsToMention = [['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004'
 var createInboxes = function createInboxes(dto) {
   var inboxNum, digest;
   return _regeneratorRuntime.async(function createInboxes$(context$1$0) {
-    var _this6 = this;
+    var _this7 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -214,27 +328,27 @@ var createInboxes = function createInboxes(dto) {
         digest = dto.digest;
 
         _ramda2['default'].map(function callee$1$0(iteration) {
-          var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2;
+          var _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop2, _iterator2, _step2, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3;
 
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            var _this5 = this;
+            var _this6 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                _iteratorNormalCompletion = true;
-                _didIteratorError = false;
-                _iteratorError = undefined;
+                _iteratorNormalCompletion2 = true;
+                _didIteratorError2 = false;
+                _iteratorError2 = undefined;
                 context$2$0.prev = 3;
 
-                _loop = function callee$2$0() {
-                  var inboxToCreate, inbox, workItemsGroup, comma, _loop2;
+                _loop2 = function callee$2$0() {
+                  var inboxToCreate, inbox, workItemsGroup, comma, _loop3;
 
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
-                    var _this4 = this;
+                    var _this5 = this;
 
                     while (1) switch (context$3$0.prev = context$3$0.next) {
                       case 0:
-                        inboxToCreate = _step.value;
+                        inboxToCreate = _step2.value;
                         context$3$0.next = 3;
                         return _regeneratorRuntime.awrap(digest.inboxCreate(inboxToCreate));
 
@@ -249,13 +363,13 @@ var createInboxes = function createInboxes(dto) {
                           console.log('Adding commits to ' + inbox.inboxId + ' of family ' + inbox.family);
                           console.log(inbox._links['add-commit'].href + '?apiKey=' + client.apiKey);
                         } else console.log(comma + '"' + client.baseUrl + '/' + client.instanceId + '/commits/tags/versionone/workitem?numbers=' + workItemsGroup.join(',') + '&apiKey=' + client.apiKey + '"');
-                        _iteratorNormalCompletion2 = true;
-                        _didIteratorError2 = false;
-                        _iteratorError2 = undefined;
+                        _iteratorNormalCompletion3 = true;
+                        _didIteratorError3 = false;
+                        _iteratorError3 = undefined;
                         context$3$0.prev = 12;
 
-                        _loop2 = function () {
-                          var workItem = _step2.value;
+                        _loop3 = function () {
+                          var workItem = _step3.value;
 
                           _ramda2['default'].map(function callee$4$0(mentionNum) {
                             var message;
@@ -270,12 +384,12 @@ var createInboxes = function createInboxes(dto) {
                                 case 'end':
                                   return context$5$0.stop();
                               }
-                            }, null, _this4);
+                            }, null, _this5);
                           }, _ramda2['default'].range(0, number_of_mentions_per_workitem_per_repo));
                         };
 
-                        for (_iterator2 = _getIterator(workItemsGroup); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                          _loop2();
+                        for (_iterator3 = _getIterator(workItemsGroup); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                          _loop3();
                         }
                         context$3$0.next = 21;
                         break;
@@ -283,26 +397,26 @@ var createInboxes = function createInboxes(dto) {
                       case 17:
                         context$3$0.prev = 17;
                         context$3$0.t0 = context$3$0['catch'](12);
-                        _didIteratorError2 = true;
-                        _iteratorError2 = context$3$0.t0;
+                        _didIteratorError3 = true;
+                        _iteratorError3 = context$3$0.t0;
 
                       case 21:
                         context$3$0.prev = 21;
                         context$3$0.prev = 22;
 
-                        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-                          _iterator2['return']();
+                        if (!_iteratorNormalCompletion3 && _iterator3['return']) {
+                          _iterator3['return']();
                         }
 
                       case 24:
                         context$3$0.prev = 24;
 
-                        if (!_didIteratorError2) {
+                        if (!_didIteratorError3) {
                           context$3$0.next = 27;
                           break;
                         }
 
-                        throw _iteratorError2;
+                        throw _iteratorError3;
 
                       case 27:
                         return context$3$0.finish(24);
@@ -314,22 +428,22 @@ var createInboxes = function createInboxes(dto) {
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this5, [[12, 17, 21, 29], [22,, 24, 28]]);
+                  }, null, _this6, [[12, 17, 21, 29], [22,, 24, 28]]);
                 };
 
-                _iterator = _getIterator(dto.inboxesToCreate);
+                _iterator2 = _getIterator(dto.inboxesToCreate);
 
               case 6:
-                if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+                if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
                   context$2$0.next = 12;
                   break;
                 }
 
                 context$2$0.next = 9;
-                return _regeneratorRuntime.awrap(_loop());
+                return _regeneratorRuntime.awrap(_loop2());
 
               case 9:
-                _iteratorNormalCompletion = true;
+                _iteratorNormalCompletion2 = true;
                 context$2$0.next = 6;
                 break;
 
@@ -340,26 +454,26 @@ var createInboxes = function createInboxes(dto) {
               case 14:
                 context$2$0.prev = 14;
                 context$2$0.t0 = context$2$0['catch'](3);
-                _didIteratorError = true;
-                _iteratorError = context$2$0.t0;
+                _didIteratorError2 = true;
+                _iteratorError2 = context$2$0.t0;
 
               case 18:
                 context$2$0.prev = 18;
                 context$2$0.prev = 19;
 
-                if (!_iteratorNormalCompletion && _iterator['return']) {
-                  _iterator['return']();
+                if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+                  _iterator2['return']();
                 }
 
               case 21:
                 context$2$0.prev = 21;
 
-                if (!_didIteratorError) {
+                if (!_didIteratorError2) {
                   context$2$0.next = 24;
                   break;
                 }
 
-                throw _iteratorError;
+                throw _iteratorError2;
 
               case 24:
                 return context$2$0.finish(21);
@@ -371,7 +485,7 @@ var createInboxes = function createInboxes(dto) {
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this6, [[3, 14, 18, 26], [19,, 21, 25]]);
+          }, null, _this7, [[3, 14, 18, 26], [19,, 21, 25]]);
         }, _ramda2['default'].range(0, number_of_repo_iterations));
 
       case 3:
@@ -381,14 +495,14 @@ var createInboxes = function createInboxes(dto) {
   }, null, _this);
 };
 
-var createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, createInbox, createSampleCommits);
+var createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxesForSampleData, createSampleCommits);
 
 var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
 
 var run = function run() {
   var iteration;
   return _regeneratorRuntime.async(function run$(context$1$0) {
-    var _this7 = this;
+    var _this8 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -422,7 +536,7 @@ var run = function run() {
                 case 'end':
                   return context$2$0.stop();
               }
-            }, null, _this7);
+            }, null, _this8);
           }, _ramda2['default'].range(0, number_of_instances));
         } catch (e) {
           // Review exception handling, it seems to be swallowing the errors
