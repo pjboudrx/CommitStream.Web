@@ -1,8 +1,8 @@
 'use strict';
 
-var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
-
 var _Map = require('babel-runtime/core-js/map')['default'];
+
+var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
 
 var _getIterator = require('babel-runtime/core-js/get-iterator')['default'];
 
@@ -31,6 +31,61 @@ var number_of_mentions_per_workitem_per_repo = parseInt(_commander2['default'].m
 var client = new _libCsApiClient2['default'](_commander2['default'].url);
 
 if (!_commander2['default'].json) console.log('Operating against this CommitStream Service API: ' + client.baseUrl);
+
+var getRealMentions = function getRealMentions() {
+  var realMentions = new _Map();
+  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
+  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
+  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
+  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
+  return realMentions;
+};
+
+var workItemsToMention = [['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'], ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'], ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'], ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']];
+
+var createMessage = function createMessage(mention, inbox) {
+  return mention + ' in  ' + inbox.inboxId + ' of family = ' + inbox.family;
+};
+
+var createCommit = function createCommit(message, inbox) {
+  var commitAddResponse;
+  return _regeneratorRuntime.async(function createCommit$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(inbox.commitCreate(message));
+
+      case 2:
+        commitAddResponse = context$1$0.sent;
+
+        if (_commander2['default'].debug) {
+          console.log(commitAddResponse.message);
+        }
+
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
+
+// :'( https://github.com/zenparsing/async-iteration/
+var getAsyncIteratorElement = function getAsyncIteratorElement(iterator) {
+  return _regeneratorRuntime.async(function getAsyncIteratorElement$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(iterator.next());
+
+      case 2:
+        return context$1$0.abrupt('return', context$1$0.sent);
+
+      case 3:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
 
 var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
   var instance, digest;
@@ -66,13 +121,34 @@ var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
   }, null, _this);
 };
 
-var getRealMentions = function getRealMentions() {
-  var realMentions = new _Map();
-  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
-  return realMentions;
+var getInboxesToCreate = function getInboxesToCreate(dto) {
+  var iteration, inboxesToCreate;
+  return _regeneratorRuntime.async(function getInboxesToCreate$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        iteration = dto.iteration;
+        inboxesToCreate = [{
+          name: 'GitHub Repo ' + iteration,
+          family: 'GitHub'
+        }, {
+          name: 'GitLab Repo ' + iteration,
+          family: 'GitLab'
+        }, {
+          name: 'Bitbucket Repo ' + iteration,
+          family: 'Bitbucket'
+        }, {
+          name: 'VsoGit Repo ' + iteration,
+          family: 'VsoGit'
+        }];
+
+        dto.inboxesToCreate = inboxesToCreate;
+        return context$1$0.abrupt('return', dto);
+
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
 };
 
 var createInboxes = _regeneratorRuntime.mark(function createInboxes(dto) {
@@ -147,24 +223,6 @@ var createInboxes = _regeneratorRuntime.mark(function createInboxes(dto) {
     }
   }, createInboxes, this, [[3, 17, 21, 29], [22,, 24, 28]]);
 });
-
-// :'( https://github.com/zenparsing/async-iteration/
-var getAsyncIteratorElement = function getAsyncIteratorElement(iterator) {
-  return _regeneratorRuntime.async(function getAsyncIteratorElement$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        context$1$0.next = 2;
-        return _regeneratorRuntime.awrap(iterator.next());
-
-      case 2:
-        return context$1$0.abrupt('return', context$1$0.sent);
-
-      case 3:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, _this);
-};
 
 var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
   var realMentions, dtoElement, _loop;
@@ -257,64 +315,6 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
     }
   }, null, _this);
 };
-
-var createMessage = function createMessage(mention, inbox) {
-  return mention + ' in  ' + inbox.inboxId + ' of family = ' + inbox.family;
-};
-
-var createCommit = function createCommit(message, inbox) {
-  var commitAddResponse;
-  return _regeneratorRuntime.async(function createCommit$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        context$1$0.next = 2;
-        return _regeneratorRuntime.awrap(inbox.commitCreate(message));
-
-      case 2:
-        commitAddResponse = context$1$0.sent;
-
-        if (_commander2['default'].debug) {
-          console.log(commitAddResponse.message);
-        }
-
-      case 4:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, _this);
-};
-
-var getInboxesToCreate = function getInboxesToCreate(dto) {
-  var iteration, inboxesToCreate;
-  return _regeneratorRuntime.async(function getInboxesToCreate$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        iteration = dto.iteration;
-        inboxesToCreate = [{
-          name: 'GitHub Repo ' + iteration,
-          family: 'GitHub'
-        }, {
-          name: 'GitLab Repo ' + iteration,
-          family: 'GitLab'
-        }, {
-          name: 'Bitbucket Repo ' + iteration,
-          family: 'Bitbucket'
-        }, {
-          name: 'VsoGit Repo ' + iteration,
-          family: 'VsoGit'
-        }];
-
-        dto.inboxesToCreate = inboxesToCreate;
-        return context$1$0.abrupt('return', dto);
-
-      case 4:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, _this);
-};
-
-var workItemsToMention = [['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'], ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'], ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'], ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']];
 
 var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
   var inboxNum, dtoElement;

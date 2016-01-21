@@ -23,6 +23,38 @@ let client = new CSApiClient(program.url);
 
 if (!program.json) console.log(`Operating against this CommitStream Service API: ${client.baseUrl}`);
 
+let getRealMentions = () => {
+  let realMentions = new Map();
+  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
+  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
+  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
+  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
+  return realMentions;
+}
+
+let workItemsToMention = [
+  ['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'],
+  ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'],
+  ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'],
+  ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']
+];
+
+let createMessage = (mention, inbox) => {
+  return `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
+}
+
+let createCommit = async(message, inbox) => {
+  let commitAddResponse = await inbox.commitCreate(message);
+  if (program.debug) {
+    console.log(commitAddResponse.message);
+  }
+}
+
+// :'( https://github.com/zenparsing/async-iteration/
+let getAsyncIteratorElement = async iterator => {
+  return await iterator.next();
+}
+
 let createInstanceAndDigest = async(iteration) => {
   let instance = await client.instanceCreate();
   let digest = await instance.digestCreate({
@@ -38,58 +70,6 @@ let createInstanceAndDigest = async(iteration) => {
     iteration, digest
   };
 };
-
-let getRealMentions = () => {
-  let realMentions = new Map();
-  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
-  return realMentions;
-}
-
-let createInboxes = async function*(dto) {
-  for (let inboxToCreate of dto.inboxesToCreate) {
-    dto.inbox = await dto.digest.inboxCreate(inboxToCreate)
-    yield dto;
-  }
-};
-
-// :'( https://github.com/zenparsing/async-iteration/
-let getAsyncIteratorElement = async iterator => {
-  return await iterator.next();
-}
-
-let createSampleCommits = async dtoAsyncIterator => {
-
-  let realMentions = getRealMentions();
-  let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
-
-  while (!dtoElement.done) {
-    let inbox = dtoElement.value.inbox;
-    realMentions.forEach(async(parentValue, parentKey) => {
-      let message = createMessage(parentKey, inbox);
-      await createCommit(message, inbox);
-      parentValue.forEach(async(childValue) => {
-        let message = createMessage(`${parentKey} ${childValue}`, inbox)
-        await createCommit(message, inbox);
-      });
-    });
-
-    dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
-  }
-}
-
-let createMessage = (mention, inbox) => {
-  return `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
-}
-
-let createCommit = async(message, inbox) => {
-  let commitAddResponse = await inbox.commitCreate(message);
-  if (program.debug) {
-    console.log(commitAddResponse.message);
-  }
-}
 
 let getInboxesToCreate = async dto => {
   let iteration = dto.iteration
@@ -110,12 +90,32 @@ let getInboxesToCreate = async dto => {
   return dto;
 }
 
-let workItemsToMention = [
-  ['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'],
-  ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'],
-  ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'],
-  ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']
-];
+let createInboxes = async function*(dto) {
+  for (let inboxToCreate of dto.inboxesToCreate) {
+    dto.inbox = await dto.digest.inboxCreate(inboxToCreate)
+    yield dto;
+  }
+};
+
+let createSampleCommits = async dtoAsyncIterator => {
+
+  let realMentions = getRealMentions();
+  let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
+
+  while (!dtoElement.done) {
+    let inbox = dtoElement.value.inbox;
+    realMentions.forEach(async(parentValue, parentKey) => {
+      let message = createMessage(parentKey, inbox);
+      await createCommit(message, inbox);
+      parentValue.forEach(async(childValue) => {
+        let message = createMessage(`${parentKey} ${childValue}`, inbox)
+        await createCommit(message, inbox);
+      });
+    });
+
+    dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
+  }
+}
 
 let createFakeCommits = async dtoAsyncIterator => {
   let inboxNum = 0;
