@@ -1,7 +1,5 @@
 'use strict';
 
-var _Map = require('babel-runtime/core-js/map')['default'];
-
 var _regeneratorRuntime = require('babel-runtime/regenerator')['default'];
 
 var _getIterator = require('babel-runtime/core-js/get-iterator')['default'];
@@ -22,26 +20,42 @@ var _ramda = require('ramda');
 
 var _ramda2 = _interopRequireDefault(_ramda);
 
+var _bluebird = require('bluebird');
+
+var _bluebird2 = _interopRequireDefault(_bluebird);
+
+var readFile = _bluebird2['default'].promisify(require("fs").readFile);
+
 _commander2['default'].version('0.0.0').option('-u, --url [url]', 'The base URL for the CommitStream Service API, default: http://localhost:6565/api', 'http://localhost:6565/api').option('-i, --instances [number]', 'Number of instances to create, default: 1', 1).option('-r, --repos [number]', 'Number of repos creation iterations to run (creates one repo per family type during each iteration), default 1', 1).option('-m, --mentions [number]', 'Number of times to post a commit with each mention (one story, 5 tasks, 5 tests in each group of workitems), default 1', 1).option('-d, --debug', 'Show results of each commit, not just summary information').option('-j, --json', 'Log only the JSON output with all the query URLs needed for the performance client').option('-s, --sample', 'Create the commits with sample data that exists in the PR builds', 0).parse(process.argv);
 
 var number_of_instances = parseInt(_commander2['default'].instances);
 var number_of_repo_iterations = parseInt(_commander2['default'].repos);
 var number_of_mentions_per_workitem_per_repo = parseInt(_commander2['default'].mentions);
+var sample_work_items_to_mention = 'sampleWorkItemsToMention.json';
+var fake_work_items_to_mention = 'fakeWorkItemsToMention.json';
 
 var client = new _libCsApiClient2['default'](_commander2['default'].url);
 
 if (!_commander2['default'].json) console.log('Operating against this CommitStream Service API: ' + client.baseUrl);
 
-var getRealMentions = function getRealMentions() {
-  var realMentions = new _Map();
-  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
-  return realMentions;
-};
+var getFromJsonFile = function getFromJsonFile(fileName) {
+  var fileContent;
+  return _regeneratorRuntime.async(function getFromJsonFile$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(readFile(fileName, "utf8"));
 
-var workItemsToMention = [['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'], ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'], ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'], ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']];
+      case 2:
+        fileContent = context$1$0.sent;
+        return context$1$0.abrupt('return', JSON.parse(fileContent));
+
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
 
 var createMessage = function createMessage(mention, inbox) {
   return mention + ' in  ' + inbox.inboxId + ' of family = ' + inbox.family;
@@ -225,18 +239,22 @@ var createInboxes = _regeneratorRuntime.mark(function createInboxes(dto) {
 });
 
 var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
-  var realMentions, dtoElement, _loop;
+  var sampleWorkItemsToMention, dtoElement, _loop;
 
   return _regeneratorRuntime.async(function createSampleCommits$(context$1$0) {
     var _this4 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        realMentions = getRealMentions();
-        context$1$0.next = 3;
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(getFromJsonFile(sample_work_items_to_mention));
+
+      case 2:
+        sampleWorkItemsToMention = context$1$0.sent;
+        context$1$0.next = 5;
         return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
 
-      case 3:
+      case 5:
         dtoElement = context$1$0.sent;
 
         _loop = function callee$1$0() {
@@ -248,7 +266,7 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
               case 0:
                 inbox = dtoElement.value.inbox;
 
-                realMentions.forEach(function callee$2$0(parentValue, parentKey) {
+                sampleWorkItemsToMention.forEach(function callee$2$0(parentValue, parentKey) {
                   var message;
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
                     var _this2 = this;
@@ -296,20 +314,20 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
           }, null, _this4);
         };
 
-      case 5:
+      case 7:
         if (dtoElement.done) {
-          context$1$0.next = 10;
+          context$1$0.next = 12;
           break;
         }
 
-        context$1$0.next = 8;
+        context$1$0.next = 10;
         return _regeneratorRuntime.awrap(_loop());
 
-      case 8:
-        context$1$0.next = 5;
+      case 10:
+        context$1$0.next = 7;
         break;
 
-      case 10:
+      case 12:
       case 'end':
         return context$1$0.stop();
     }
@@ -317,7 +335,7 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
 };
 
 var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
-  var inboxNum, dtoElement;
+  var inboxNum, dtoElement, workItemsToMention;
   return _regeneratorRuntime.async(function createFakeCommits$(context$1$0) {
     var _this7 = this;
 
@@ -329,6 +347,11 @@ var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
 
       case 3:
         dtoElement = context$1$0.sent;
+        context$1$0.next = 6;
+        return _regeneratorRuntime.awrap(getFromJsonFile(fake_work_items_to_mention));
+
+      case 6:
+        workItemsToMention = context$1$0.sent;
 
         _ramda2['default'].map(function callee$1$0(iteration) {
           var _loop2, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2;
@@ -453,7 +476,7 @@ var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
           }, null, _this7);
         }, _ramda2['default'].range(0, number_of_repo_iterations));
 
-      case 5:
+      case 8:
       case 'end':
         return context$1$0.stop();
     }

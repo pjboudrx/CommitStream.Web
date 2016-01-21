@@ -3,6 +3,8 @@
 import program from 'commander';
 import CSApiClient from './lib/cs-api-client';
 import R from 'ramda';
+import Promise from 'bluebird';
+let readFile = Promise.promisify(require("fs").readFile);
 
 program
   .version('0.0.0')
@@ -18,26 +20,17 @@ program
 const number_of_instances = parseInt(program.instances);
 const number_of_repo_iterations = parseInt(program.repos);
 const number_of_mentions_per_workitem_per_repo = parseInt(program.mentions);
+const sample_work_items_to_mention = 'sampleWorkItemsToMention.json';
+const fake_work_items_to_mention = 'fakeWorkItemsToMention.json';
 
 let client = new CSApiClient(program.url);
 
 if (!program.json) console.log(`Operating against this CommitStream Service API: ${client.baseUrl}`);
 
-let getRealMentions = () => {
-  let realMentions = new Map();
-  realMentions.set('S-01041', ['AT-01075', 'AT-01076', 'AT-01077', 'AT-01085', 'TK-01078', 'TK-01079', 'TK-01080', 'TK-01098', 'TK-01100']);
-  realMentions.set('S-01042', ['AT-01078', 'AT-01079', 'AT-01080', 'AT-01081', 'AT-01082', 'TK-01081', 'TK-01082', 'TK-01083', 'TK-01084']);
-  realMentions.set('S-01043', ['AT-01083', 'AT-01084', 'AT-01086', 'AT-01087', 'TK-01086', 'TK-01087', 'TK-01088', 'TK-01089']);
-  realMentions.set('S-01064', ['AT-01097', 'TK-01113', 'TK-01114']);
-  return realMentions;
+let getFromJsonFile = async(fileName) => {
+  let fileContent = await readFile(fileName, "utf8");
+  return JSON.parse(fileContent);
 }
-
-let workItemsToMention = [
-  ['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'],
-  ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'],
-  ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'],
-  ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']
-];
 
 let createMessage = (mention, inbox) => {
   return `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
@@ -98,13 +91,12 @@ let createInboxes = async function*(dto) {
 };
 
 let createSampleCommits = async dtoAsyncIterator => {
-
-  let realMentions = getRealMentions();
+  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
   let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
 
   while (!dtoElement.done) {
     let inbox = dtoElement.value.inbox;
-    realMentions.forEach(async(parentValue, parentKey) => {
+    sampleWorkItemsToMention.forEach(async(parentValue, parentKey) => {
       let message = createMessage(parentKey, inbox);
       await createCommit(message, inbox);
       parentValue.forEach(async(childValue) => {
@@ -120,6 +112,7 @@ let createSampleCommits = async dtoAsyncIterator => {
 let createFakeCommits = async dtoAsyncIterator => {
   let inboxNum = 0;
   let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
+  let workItemsToMention = await getFromJsonFile(fake_work_items_to_mention);
 
   R.map(async iteration => {
     while (!dtoElement.done) {
