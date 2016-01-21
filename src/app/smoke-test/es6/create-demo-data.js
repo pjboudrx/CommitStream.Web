@@ -35,7 +35,7 @@ let createInstanceAndDigest = async(iteration) => {
   }
 
   return {
-    instance, digest
+    iteration, digest
   };
 };
 
@@ -48,27 +48,25 @@ let getRealMentions = () => {
   return realMentions;
 }
 
-let createInboxesForSampleData = async function*(dto) {
+let createInboxes = async function*(dto) {
   for (let inboxToCreate of dto.inboxesToCreate) {
-    yield await dto.digest.inboxCreate(inboxToCreate)
+    dto.inbox = await dto.digest.inboxCreate(inboxToCreate)
+    yield dto;
   }
 };
 
 // :'( https://github.com/zenparsing/async-iteration/
 let getAsyncIteratorElement = async iterator => {
-  let i = await iterator.next();
-  return i;
+  return await iterator.next();
 }
 
-let createSampleCommits = async inboxesAsyncIterator => {
+let createSampleCommits = async dtoAsyncIterator => {
 
   let realMentions = getRealMentions();
+  let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
 
-  let inboxElement = await getAsyncIteratorElement(inboxesAsyncIterator);
-
-  while (!inboxElement.done) {
-    let inbox = inboxElement.value;
-
+  while (!dtoElement.done) {
+    let inbox = dtoElement.value.inbox;
     realMentions.forEach(async(parentValue, parentKey) => {
       let message = createMessage(parentKey, inbox);
       await createCommit(message, inbox);
@@ -78,7 +76,7 @@ let createSampleCommits = async inboxesAsyncIterator => {
       });
     });
 
-    inboxElement = await getAsyncIteratorElement(inboxesAsyncIterator);
+    dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
   }
 }
 
@@ -93,7 +91,7 @@ let createCommit = async(message, inbox) => {
   }
 }
 
-let getInboxesToCreate = async(dto) => {
+let getInboxesToCreate = async dto => {
   let iteration = dto.iteration
   let inboxesToCreate = [{
     name: `GitHub Repo ${iteration}`,
@@ -119,17 +117,18 @@ let workItemsToMention = [
   ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']
 ];
 
-
-let createInboxes = async(dto) => {
+let createFakeCommits = async dtoAsyncIterator => {
   let inboxNum = 0;
-  let digest = dto.digest;
+  let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
+
   R.map(async iteration => {
-    for (let inboxToCreate of dto.inboxesToCreate) {
-      let inbox = await digest.inboxCreate(inboxToCreate);
+    while (!dtoElement.done) {
+      let dto = dtoElement.value;
+      let digest = dto.digest;
+      let inbox = dto.inbox;
       let workItemsGroup = workItemsToMention[inboxNum % 4];
       let comma = (iteration === 0 && inboxNum === 0) ? '' : ',';
       inboxNum++;
-      dto.inbox = inbox;
       if (!program.json) {
         console.log(`Adding commits to ${inbox.inboxId} of family ${inbox.family}`);
         console.log(`${inbox._links['add-commit'].href}?apiKey=${client.apiKey}`);
@@ -140,6 +139,8 @@ let createInboxes = async(dto) => {
           createCommit(message, inbox);
         }, R.range(0, number_of_mentions_per_workitem_per_repo));
       }
+
+      dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
     }
   }, R.range(0, number_of_repo_iterations));
 }
@@ -147,14 +148,15 @@ let createInboxes = async(dto) => {
 let createInstanceWithSampleData = R.pipeP(
   createInstanceAndDigest,
   getInboxesToCreate,
-  createInboxesForSampleData,
+  createInboxes,
   createSampleCommits
 );
 
 let createInstanceWithFakeData = R.pipeP(
   createInstanceAndDigest,
   getInboxesToCreate,
-  createInboxes
+  createInboxes,
+  createFakeCommits
 );
 
 let run = async() => {

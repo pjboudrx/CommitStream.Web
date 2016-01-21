@@ -56,7 +56,7 @@ var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
         }
 
         return context$1$0.abrupt('return', {
-          instance: instance, digest: digest
+          iteration: iteration, digest: digest
         });
 
       case 8:
@@ -75,10 +75,10 @@ var getRealMentions = function getRealMentions() {
   return realMentions;
 };
 
-var createInboxesForSampleData = _regeneratorRuntime.mark(function createInboxesForSampleData(dto) {
+var createInboxes = _regeneratorRuntime.mark(function createInboxes(dto) {
   var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, inboxToCreate;
 
-  return _regeneratorRuntime.async(function createInboxesForSampleData$(context$1$0) {
+  return _regeneratorRuntime.async(function createInboxes$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         _iteratorNormalCompletion = true;
@@ -89,7 +89,7 @@ var createInboxesForSampleData = _regeneratorRuntime.mark(function createInboxes
 
       case 5:
         if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-          context$1$0.next = 14;
+          context$1$0.next = 15;
           break;
         }
 
@@ -98,58 +98,58 @@ var createInboxesForSampleData = _regeneratorRuntime.mark(function createInboxes
         return _regeneratorRuntime.awrap(dto.digest.inboxCreate(inboxToCreate));
 
       case 9:
-        context$1$0.next = 11;
-        return context$1$0.sent;
+        dto.inbox = context$1$0.sent;
+        context$1$0.next = 12;
+        return dto;
 
-      case 11:
+      case 12:
         _iteratorNormalCompletion = true;
         context$1$0.next = 5;
         break;
 
-      case 14:
-        context$1$0.next = 20;
+      case 15:
+        context$1$0.next = 21;
         break;
 
-      case 16:
-        context$1$0.prev = 16;
+      case 17:
+        context$1$0.prev = 17;
         context$1$0.t0 = context$1$0['catch'](3);
         _didIteratorError = true;
         _iteratorError = context$1$0.t0;
 
-      case 20:
-        context$1$0.prev = 20;
+      case 21:
         context$1$0.prev = 21;
+        context$1$0.prev = 22;
 
         if (!_iteratorNormalCompletion && _iterator['return']) {
           _iterator['return']();
         }
 
-      case 23:
-        context$1$0.prev = 23;
+      case 24:
+        context$1$0.prev = 24;
 
         if (!_didIteratorError) {
-          context$1$0.next = 26;
+          context$1$0.next = 27;
           break;
         }
 
         throw _iteratorError;
 
-      case 26:
-        return context$1$0.finish(23);
-
       case 27:
-        return context$1$0.finish(20);
+        return context$1$0.finish(24);
 
       case 28:
+        return context$1$0.finish(21);
+
+      case 29:
       case 'end':
         return context$1$0.stop();
     }
-  }, createInboxesForSampleData, this, [[3, 16, 20, 28], [21,, 23, 27]]);
+  }, createInboxes, this, [[3, 17, 21, 29], [22,, 24, 28]]);
 });
 
 // :'( https://github.com/zenparsing/async-iteration/
 var getAsyncIteratorElement = function getAsyncIteratorElement(iterator) {
-  var i;
   return _regeneratorRuntime.async(function getAsyncIteratorElement$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -157,18 +157,17 @@ var getAsyncIteratorElement = function getAsyncIteratorElement(iterator) {
         return _regeneratorRuntime.awrap(iterator.next());
 
       case 2:
-        i = context$1$0.sent;
-        return context$1$0.abrupt('return', i);
+        return context$1$0.abrupt('return', context$1$0.sent);
 
-      case 4:
+      case 3:
       case 'end':
         return context$1$0.stop();
     }
   }, null, _this);
 };
 
-var createSampleCommits = function createSampleCommits(inboxesAsyncIterator) {
-  var realMentions, inboxElement, _loop;
+var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
+  var realMentions, dtoElement, _loop;
 
   return _regeneratorRuntime.async(function createSampleCommits$(context$1$0) {
     var _this4 = this;
@@ -177,10 +176,10 @@ var createSampleCommits = function createSampleCommits(inboxesAsyncIterator) {
       case 0:
         realMentions = getRealMentions();
         context$1$0.next = 3;
-        return _regeneratorRuntime.awrap(getAsyncIteratorElement(inboxesAsyncIterator));
+        return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
 
       case 3:
-        inboxElement = context$1$0.sent;
+        dtoElement = context$1$0.sent;
 
         _loop = function callee$1$0() {
           var inbox;
@@ -189,7 +188,7 @@ var createSampleCommits = function createSampleCommits(inboxesAsyncIterator) {
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                inbox = inboxElement.value;
+                inbox = dtoElement.value.inbox;
 
                 realMentions.forEach(function callee$2$0(parentValue, parentKey) {
                   var message;
@@ -227,10 +226,10 @@ var createSampleCommits = function createSampleCommits(inboxesAsyncIterator) {
                 });
 
                 context$2$0.next = 4;
-                return _regeneratorRuntime.awrap(getAsyncIteratorElement(inboxesAsyncIterator));
+                return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
 
               case 4:
-                inboxElement = context$2$0.sent;
+                dtoElement = context$2$0.sent;
 
               case 5:
               case 'end':
@@ -240,7 +239,7 @@ var createSampleCommits = function createSampleCommits(inboxesAsyncIterator) {
         };
 
       case 5:
-        if (inboxElement.done) {
+        if (dtoElement.done) {
           context$1$0.next = 10;
           break;
         }
@@ -317,59 +316,54 @@ var getInboxesToCreate = function getInboxesToCreate(dto) {
 
 var workItemsToMention = [['S-00001', 'T-00001', 'T-00002', 'T-00003', 'T-00004', 'T-00005', 'AT-00001', 'AT-00002', 'AT-00003', 'AT-00004', 'AT-00005'], ['S-00002', 'T-00011', 'T-00012', 'T-00013', 'T-00014', 'T-00015', 'AT-00011', 'AT-00012', 'AT-00013', 'AT-00014', 'AT-00015'], ['S-00003', 'T-00021', 'T-00022', 'T-00023', 'T-00024', 'T-00025', 'AT-00021', 'AT-00022', 'AT-00023', 'AT-00024', 'AT-00025'], ['S-00004', 'T-00031', 'T-00032', 'T-00033', 'T-00034', 'T-00035', 'AT-00031', 'AT-00032', 'AT-00033', 'AT-00034', 'AT-00035']];
 
-var createInboxes = function createInboxes(dto) {
-  var inboxNum, digest;
-  return _regeneratorRuntime.async(function createInboxes$(context$1$0) {
+var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
+  var inboxNum, dtoElement;
+  return _regeneratorRuntime.async(function createFakeCommits$(context$1$0) {
     var _this7 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         inboxNum = 0;
-        digest = dto.digest;
+        context$1$0.next = 3;
+        return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
+
+      case 3:
+        dtoElement = context$1$0.sent;
 
         _ramda2['default'].map(function callee$1$0(iteration) {
-          var _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop2, _iterator2, _step2, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3;
+          var _loop2, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2;
 
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
             var _this6 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                _iteratorNormalCompletion2 = true;
-                _didIteratorError2 = false;
-                _iteratorError2 = undefined;
-                context$2$0.prev = 3;
-
                 _loop2 = function callee$2$0() {
-                  var inboxToCreate, inbox, workItemsGroup, comma, _loop3;
+                  var dto, digest, inbox, workItemsGroup, comma, _loop3;
 
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
                     var _this5 = this;
 
                     while (1) switch (context$3$0.prev = context$3$0.next) {
                       case 0:
-                        inboxToCreate = _step2.value;
-                        context$3$0.next = 3;
-                        return _regeneratorRuntime.awrap(digest.inboxCreate(inboxToCreate));
-
-                      case 3:
-                        inbox = context$3$0.sent;
+                        dto = dtoElement.value;
+                        digest = dto.digest;
+                        inbox = dto.inbox;
                         workItemsGroup = workItemsToMention[inboxNum % 4];
                         comma = iteration === 0 && inboxNum === 0 ? '' : ',';
 
                         inboxNum++;
-                        dto.inbox = inbox;
                         if (!_commander2['default'].json) {
                           console.log('Adding commits to ' + inbox.inboxId + ' of family ' + inbox.family);
                           console.log(inbox._links['add-commit'].href + '?apiKey=' + client.apiKey);
                         } else console.log(comma + '"' + client.baseUrl + '/' + client.instanceId + '/commits/tags/versionone/workitem?numbers=' + workItemsGroup.join(',') + '&apiKey=' + client.apiKey + '"');
-                        _iteratorNormalCompletion3 = true;
-                        _didIteratorError3 = false;
-                        _iteratorError3 = undefined;
-                        context$3$0.prev = 12;
+                        _iteratorNormalCompletion2 = true;
+                        _didIteratorError2 = false;
+                        _iteratorError2 = undefined;
+                        context$3$0.prev = 10;
 
                         _loop3 = function () {
-                          var workItem = _step3.value;
+                          var workItem = _step2.value;
 
                           _ramda2['default'].map(function callee$4$0(mentionNum) {
                             var message;
@@ -388,116 +382,87 @@ var createInboxes = function createInboxes(dto) {
                           }, _ramda2['default'].range(0, number_of_mentions_per_workitem_per_repo));
                         };
 
-                        for (_iterator3 = _getIterator(workItemsGroup); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        for (_iterator2 = _getIterator(workItemsGroup); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                           _loop3();
                         }
-                        context$3$0.next = 21;
+
+                        context$3$0.next = 19;
                         break;
 
-                      case 17:
-                        context$3$0.prev = 17;
-                        context$3$0.t0 = context$3$0['catch'](12);
-                        _didIteratorError3 = true;
-                        _iteratorError3 = context$3$0.t0;
+                      case 15:
+                        context$3$0.prev = 15;
+                        context$3$0.t0 = context$3$0['catch'](10);
+                        _didIteratorError2 = true;
+                        _iteratorError2 = context$3$0.t0;
 
-                      case 21:
-                        context$3$0.prev = 21;
-                        context$3$0.prev = 22;
+                      case 19:
+                        context$3$0.prev = 19;
+                        context$3$0.prev = 20;
 
-                        if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-                          _iterator3['return']();
+                        if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+                          _iterator2['return']();
                         }
 
-                      case 24:
-                        context$3$0.prev = 24;
+                      case 22:
+                        context$3$0.prev = 22;
 
-                        if (!_didIteratorError3) {
-                          context$3$0.next = 27;
+                        if (!_didIteratorError2) {
+                          context$3$0.next = 25;
                           break;
                         }
 
-                        throw _iteratorError3;
+                        throw _iteratorError2;
+
+                      case 25:
+                        return context$3$0.finish(22);
+
+                      case 26:
+                        return context$3$0.finish(19);
 
                       case 27:
-                        return context$3$0.finish(24);
-
-                      case 28:
-                        return context$3$0.finish(21);
+                        context$3$0.next = 29;
+                        return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
 
                       case 29:
+                        dtoElement = context$3$0.sent;
+
+                      case 30:
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this6, [[12, 17, 21, 29], [22,, 24, 28]]);
+                  }, null, _this6, [[10, 15, 19, 27], [20,, 22, 26]]);
                 };
 
-                _iterator2 = _getIterator(dto.inboxesToCreate);
-
-              case 6:
-                if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-                  context$2$0.next = 12;
+              case 1:
+                if (dtoElement.done) {
+                  context$2$0.next = 6;
                   break;
                 }
 
-                context$2$0.next = 9;
+                context$2$0.next = 4;
                 return _regeneratorRuntime.awrap(_loop2());
 
-              case 9:
-                _iteratorNormalCompletion2 = true;
-                context$2$0.next = 6;
+              case 4:
+                context$2$0.next = 1;
                 break;
 
-              case 12:
-                context$2$0.next = 18;
-                break;
-
-              case 14:
-                context$2$0.prev = 14;
-                context$2$0.t0 = context$2$0['catch'](3);
-                _didIteratorError2 = true;
-                _iteratorError2 = context$2$0.t0;
-
-              case 18:
-                context$2$0.prev = 18;
-                context$2$0.prev = 19;
-
-                if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-                  _iterator2['return']();
-                }
-
-              case 21:
-                context$2$0.prev = 21;
-
-                if (!_didIteratorError2) {
-                  context$2$0.next = 24;
-                  break;
-                }
-
-                throw _iteratorError2;
-
-              case 24:
-                return context$2$0.finish(21);
-
-              case 25:
-                return context$2$0.finish(18);
-
-              case 26:
+              case 6:
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this7, [[3, 14, 18, 26], [19,, 21, 25]]);
+          }, null, _this7);
         }, _ramda2['default'].range(0, number_of_repo_iterations));
 
-      case 3:
+      case 5:
       case 'end':
         return context$1$0.stop();
     }
   }, null, _this);
 };
 
-var createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxesForSampleData, createSampleCommits);
+var createInstanceWithSampleData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes, createSampleCommits);
 
-var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
+var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes, createFakeCommits);
 
 var run = function run() {
   var iteration;
