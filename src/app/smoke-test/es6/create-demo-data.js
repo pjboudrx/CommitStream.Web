@@ -96,13 +96,20 @@ let createSampleCommits = async dtoAsyncIterator => {
 
   while (!dtoElement.done) {
     let inbox = dtoElement.value.inbox;
-    sampleWorkItemsToMention.forEach(async(parentValue, parentKey) => {
-      let message = createMessage(parentKey, inbox);
+    sampleWorkItemsToMention.forEach(async(story) => {
+      let message = createMessage(story.StoryId, inbox);
       await createCommit(message, inbox);
-      parentValue.forEach(async(childValue) => {
-        let message = createMessage(`${parentKey} ${childValue}`, inbox)
+
+      story.Tests.forEach(async(test) => {
+        let message = createMessage(`${story.StoryId} ${test}`, inbox)
         await createCommit(message, inbox);
       });
+
+      story.Tasks.forEach(async(task) => {
+        let message = createMessage(`${story.StoryId} ${task}`, inbox)
+        await createCommit(message, inbox);
+      });
+
     });
 
     dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);

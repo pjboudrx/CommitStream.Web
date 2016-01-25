@@ -266,24 +266,25 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
               case 0:
                 inbox = dtoElement.value.inbox;
 
-                sampleWorkItemsToMention.forEach(function callee$2$0(parentValue, parentKey) {
+                sampleWorkItemsToMention.forEach(function callee$2$0(story) {
                   var message;
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
                     var _this2 = this;
 
                     while (1) switch (context$3$0.prev = context$3$0.next) {
                       case 0:
-                        message = createMessage(parentKey, inbox);
+                        message = createMessage(story.StoryId, inbox);
                         context$3$0.next = 3;
                         return _regeneratorRuntime.awrap(createCommit(message, inbox));
 
                       case 3:
-                        parentValue.forEach(function callee$3$0(childValue) {
+
+                        story.Tests.forEach(function callee$3$0(test) {
                           var message;
                           return _regeneratorRuntime.async(function callee$3$0$(context$4$0) {
                             while (1) switch (context$4$0.prev = context$4$0.next) {
                               case 0:
-                                message = createMessage(parentKey + ' ' + childValue, inbox);
+                                message = createMessage(story.StoryId + ' ' + test, inbox);
                                 context$4$0.next = 3;
                                 return _regeneratorRuntime.awrap(createCommit(message, inbox));
 
@@ -294,7 +295,23 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
                           }, null, _this2);
                         });
 
-                      case 4:
+                        story.Tasks.forEach(function callee$3$0(task) {
+                          var message;
+                          return _regeneratorRuntime.async(function callee$3$0$(context$4$0) {
+                            while (1) switch (context$4$0.prev = context$4$0.next) {
+                              case 0:
+                                message = createMessage(story.StoryId + ' ' + task, inbox);
+                                context$4$0.next = 3;
+                                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+                              case 3:
+                              case 'end':
+                                return context$4$0.stop();
+                            }
+                          }, null, _this2);
+                        });
+
+                      case 5:
                       case 'end':
                         return context$3$0.stop();
                     }
