@@ -44,8 +44,12 @@ let createCommit = async(message, inbox) => {
 }
 
 // :'( https://github.com/zenparsing/async-iteration/
-let getAsyncIteratorElement = async iterator => {
-  return await iterator.next();
+let mapP = async(fun, iterator) => {
+  let element = await iterator.next();
+  while (!element.done) {
+    fun(element.value);
+    element = await iterator.next();
+  }
 }
 
 let createInstanceAndDigest = async(iteration) => {
@@ -92,10 +96,9 @@ let createInboxes = async function*(dto) {
 
 let createSampleCommits = async dtoAsyncIterator => {
   let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
-  let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
 
-  while (!dtoElement.done) {
-    let inbox = dtoElement.value.inbox;
+  mapP(async dto => {
+    let inbox = dto.inbox;
     sampleWorkItemsToMention.forEach(async(story) => {
       let message = createMessage(story.StoryId, inbox);
       await createCommit(message, inbox);
@@ -109,21 +112,48 @@ let createSampleCommits = async dtoAsyncIterator => {
         let message = createMessage(`${story.StoryId} ${task}`, inbox)
         await createCommit(message, inbox);
       });
+    });
+  }, dtoAsyncIterator);
 
+}
+
+let createSampleTestsCommits = async dtoAsyncIterator => {
+  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
+
+  mapP(async dto => {
+    let inbox = dto.inbox;
+    sampleWorkItemsToMention.forEach(async(story) => {
+      story.Tests.forEach(async(test) => {
+        let message = createMessage(`${story.StoryId} ${test}`, inbox)
+        await createCommit(message, inbox);
+      });
     });
 
-    dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
-  }
+  }, dtoAsyncIterator);
+
+}
+
+let createSampleTasksCommits = async dtoAsyncIterator => {
+  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
+
+  mapP(async dto => {
+    let inbox = dto.inbox;
+    sampleWorkItemsToMention.forEach(async(story) => {
+      story.Tasks.forEach(async(task) => {
+        let message = createMessage(`${story.StoryId} ${task}`, inbox)
+        await createCommit(message, inbox);
+      });
+    });
+  }, dtoAsyncIterator);
+
 }
 
 let createFakeCommits = async dtoAsyncIterator => {
   let inboxNum = 0;
-  let dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
   let workItemsToMention = await getFromJsonFile(fake_work_items_to_mention);
 
   R.map(async iteration => {
-    while (!dtoElement.done) {
-      let dto = dtoElement.value;
+    mapP(async dto => {
       let digest = dto.digest;
       let inbox = dto.inbox;
       let workItemsGroup = workItemsToMention[inboxNum % 4];
@@ -139,9 +169,8 @@ let createFakeCommits = async dtoAsyncIterator => {
           createCommit(message, inbox);
         }, R.range(0, number_of_mentions_per_workitem_per_repo));
       }
+    }, dtoAsyncIterator);
 
-      dtoElement = await getAsyncIteratorElement(dtoAsyncIterator);
-    }
   }, R.range(0, number_of_repo_iterations));
 }
 

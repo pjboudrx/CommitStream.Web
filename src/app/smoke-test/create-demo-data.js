@@ -84,17 +84,33 @@ var createCommit = function createCommit(message, inbox) {
 };
 
 // :'( https://github.com/zenparsing/async-iteration/
-var getAsyncIteratorElement = function getAsyncIteratorElement(iterator) {
-  return _regeneratorRuntime.async(function getAsyncIteratorElement$(context$1$0) {
+var mapP = function mapP(fun, iterator) {
+  var element;
+  return _regeneratorRuntime.async(function mapP$(context$1$0) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         context$1$0.next = 2;
         return _regeneratorRuntime.awrap(iterator.next());
 
       case 2:
-        return context$1$0.abrupt('return', context$1$0.sent);
+        element = context$1$0.sent;
 
       case 3:
+        if (element.done) {
+          context$1$0.next = 10;
+          break;
+        }
+
+        fun(element.value);
+        context$1$0.next = 7;
+        return _regeneratorRuntime.awrap(iterator.next());
+
+      case 7:
+        element = context$1$0.sent;
+        context$1$0.next = 3;
+        break;
+
+      case 10:
       case 'end':
         return context$1$0.stop();
     }
@@ -239,8 +255,7 @@ var createInboxes = _regeneratorRuntime.mark(function createInboxes(dto) {
 });
 
 var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
-  var sampleWorkItemsToMention, dtoElement, _loop;
-
+  var sampleWorkItemsToMention;
   return _regeneratorRuntime.async(function createSampleCommits$(context$1$0) {
     var _this4 = this;
 
@@ -251,20 +266,15 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
 
       case 2:
         sampleWorkItemsToMention = context$1$0.sent;
-        context$1$0.next = 5;
-        return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
 
-      case 5:
-        dtoElement = context$1$0.sent;
-
-        _loop = function callee$1$0() {
+        mapP(function callee$1$0(dto) {
           var inbox;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
             var _this3 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                inbox = dtoElement.value.inbox;
+                inbox = dto.inbox;
 
                 sampleWorkItemsToMention.forEach(function callee$2$0(story) {
                   var message;
@@ -318,33 +328,144 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
                   }, null, _this3);
                 });
 
-                context$2$0.next = 4;
-                return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
-
-              case 4:
-                dtoElement = context$2$0.sent;
-
-              case 5:
+              case 2:
               case 'end':
                 return context$2$0.stop();
             }
           }, null, _this4);
-        };
+        }, dtoAsyncIterator);
 
-      case 7:
-        if (dtoElement.done) {
-          context$1$0.next = 12;
-          break;
-        }
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
 
-        context$1$0.next = 10;
-        return _regeneratorRuntime.awrap(_loop());
+var createSampleTestsCommits = function createSampleTestsCommits(dtoAsyncIterator) {
+  var sampleWorkItemsToMention;
+  return _regeneratorRuntime.async(function createSampleTestsCommits$(context$1$0) {
+    var _this7 = this;
 
-      case 10:
-        context$1$0.next = 7;
-        break;
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(getFromJsonFile(sample_work_items_to_mention));
 
-      case 12:
+      case 2:
+        sampleWorkItemsToMention = context$1$0.sent;
+
+        mapP(function callee$1$0(dto) {
+          var inbox;
+          return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
+            var _this6 = this;
+
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+              case 0:
+                inbox = dto.inbox;
+
+                sampleWorkItemsToMention.forEach(function callee$2$0(story) {
+                  return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
+                    var _this5 = this;
+
+                    while (1) switch (context$3$0.prev = context$3$0.next) {
+                      case 0:
+                        story.Tests.forEach(function callee$3$0(test) {
+                          var message;
+                          return _regeneratorRuntime.async(function callee$3$0$(context$4$0) {
+                            while (1) switch (context$4$0.prev = context$4$0.next) {
+                              case 0:
+                                message = createMessage(story.StoryId + ' ' + test, inbox);
+                                context$4$0.next = 3;
+                                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+                              case 3:
+                              case 'end':
+                                return context$4$0.stop();
+                            }
+                          }, null, _this5);
+                        });
+
+                      case 1:
+                      case 'end':
+                        return context$3$0.stop();
+                    }
+                  }, null, _this6);
+                });
+
+              case 2:
+              case 'end':
+                return context$2$0.stop();
+            }
+          }, null, _this7);
+        }, dtoAsyncIterator);
+
+      case 4:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
+
+var createSampleTasksCommits = function createSampleTasksCommits(dtoAsyncIterator) {
+  var sampleWorkItemsToMention;
+  return _regeneratorRuntime.async(function createSampleTasksCommits$(context$1$0) {
+    var _this10 = this;
+
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(getFromJsonFile(sample_work_items_to_mention));
+
+      case 2:
+        sampleWorkItemsToMention = context$1$0.sent;
+
+        mapP(function callee$1$0(dto) {
+          var inbox;
+          return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
+            var _this9 = this;
+
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+              case 0:
+                inbox = dto.inbox;
+
+                sampleWorkItemsToMention.forEach(function callee$2$0(story) {
+                  return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
+                    var _this8 = this;
+
+                    while (1) switch (context$3$0.prev = context$3$0.next) {
+                      case 0:
+                        story.Tasks.forEach(function callee$3$0(task) {
+                          var message;
+                          return _regeneratorRuntime.async(function callee$3$0$(context$4$0) {
+                            while (1) switch (context$4$0.prev = context$4$0.next) {
+                              case 0:
+                                message = createMessage(story.StoryId + ' ' + task, inbox);
+                                context$4$0.next = 3;
+                                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+                              case 3:
+                              case 'end':
+                                return context$4$0.stop();
+                            }
+                          }, null, _this8);
+                        });
+
+                      case 1:
+                      case 'end':
+                        return context$3$0.stop();
+                    }
+                  }, null, _this9);
+                });
+
+              case 2:
+              case 'end':
+                return context$2$0.stop();
+            }
+          }, null, _this10);
+        }, dtoAsyncIterator);
+
+      case 4:
       case 'end':
         return context$1$0.stop();
     }
@@ -352,41 +473,33 @@ var createSampleCommits = function createSampleCommits(dtoAsyncIterator) {
 };
 
 var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
-  var inboxNum, dtoElement, workItemsToMention;
+  var inboxNum, workItemsToMention;
   return _regeneratorRuntime.async(function createFakeCommits$(context$1$0) {
-    var _this7 = this;
+    var _this13 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         inboxNum = 0;
         context$1$0.next = 3;
-        return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
-
-      case 3:
-        dtoElement = context$1$0.sent;
-        context$1$0.next = 6;
         return _regeneratorRuntime.awrap(getFromJsonFile(fake_work_items_to_mention));
 
-      case 6:
+      case 3:
         workItemsToMention = context$1$0.sent;
 
         _ramda2['default'].map(function callee$1$0(iteration) {
-          var _loop2, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2;
-
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            var _this6 = this;
+            var _this12 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                _loop2 = function callee$2$0() {
-                  var dto, digest, inbox, workItemsGroup, comma, _loop3;
+                mapP(function callee$2$0(dto) {
+                  var digest, inbox, workItemsGroup, comma, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop, _iterator2, _step2;
 
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
-                    var _this5 = this;
+                    var _this11 = this;
 
                     while (1) switch (context$3$0.prev = context$3$0.next) {
                       case 0:
-                        dto = dtoElement.value;
                         digest = dto.digest;
                         inbox = dto.inbox;
                         workItemsGroup = workItemsToMention[inboxNum % 4];
@@ -400,9 +513,9 @@ var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
                         _iteratorNormalCompletion2 = true;
                         _didIteratorError2 = false;
                         _iteratorError2 = undefined;
-                        context$3$0.prev = 10;
+                        context$3$0.prev = 9;
 
-                        _loop3 = function () {
+                        _loop = function () {
                           var workItem = _step2.value;
 
                           _ramda2['default'].map(function callee$4$0(mentionNum) {
@@ -418,82 +531,61 @@ var createFakeCommits = function createFakeCommits(dtoAsyncIterator) {
                                 case 'end':
                                   return context$5$0.stop();
                               }
-                            }, null, _this5);
+                            }, null, _this11);
                           }, _ramda2['default'].range(0, number_of_mentions_per_workitem_per_repo));
                         };
 
                         for (_iterator2 = _getIterator(workItemsGroup); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                          _loop3();
+                          _loop();
                         }
-
-                        context$3$0.next = 19;
+                        context$3$0.next = 18;
                         break;
 
-                      case 15:
-                        context$3$0.prev = 15;
-                        context$3$0.t0 = context$3$0['catch'](10);
+                      case 14:
+                        context$3$0.prev = 14;
+                        context$3$0.t0 = context$3$0['catch'](9);
                         _didIteratorError2 = true;
                         _iteratorError2 = context$3$0.t0;
 
-                      case 19:
+                      case 18:
+                        context$3$0.prev = 18;
                         context$3$0.prev = 19;
-                        context$3$0.prev = 20;
 
                         if (!_iteratorNormalCompletion2 && _iterator2['return']) {
                           _iterator2['return']();
                         }
 
-                      case 22:
-                        context$3$0.prev = 22;
+                      case 21:
+                        context$3$0.prev = 21;
 
                         if (!_didIteratorError2) {
-                          context$3$0.next = 25;
+                          context$3$0.next = 24;
                           break;
                         }
 
                         throw _iteratorError2;
 
+                      case 24:
+                        return context$3$0.finish(21);
+
                       case 25:
-                        return context$3$0.finish(22);
+                        return context$3$0.finish(18);
 
                       case 26:
-                        return context$3$0.finish(19);
-
-                      case 27:
-                        context$3$0.next = 29;
-                        return _regeneratorRuntime.awrap(getAsyncIteratorElement(dtoAsyncIterator));
-
-                      case 29:
-                        dtoElement = context$3$0.sent;
-
-                      case 30:
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this6, [[10, 15, 19, 27], [20,, 22, 26]]);
-                };
+                  }, null, _this12, [[9, 14, 18, 26], [19,, 21, 25]]);
+                }, dtoAsyncIterator);
 
               case 1:
-                if (dtoElement.done) {
-                  context$2$0.next = 6;
-                  break;
-                }
-
-                context$2$0.next = 4;
-                return _regeneratorRuntime.awrap(_loop2());
-
-              case 4:
-                context$2$0.next = 1;
-                break;
-
-              case 6:
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this7);
+          }, null, _this13);
         }, _ramda2['default'].range(0, number_of_repo_iterations));
 
-      case 8:
+      case 5:
       case 'end':
         return context$1$0.stop();
     }
@@ -507,7 +599,7 @@ var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDiges
 var run = function run() {
   var iteration;
   return _regeneratorRuntime.async(function run$(context$1$0) {
-    var _this8 = this;
+    var _this14 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -541,7 +633,7 @@ var run = function run() {
                 case 'end':
                   return context$2$0.stop();
               }
-            }, null, _this8);
+            }, null, _this14);
           }, _ramda2['default'].range(0, number_of_instances));
         } catch (e) {
           // Review exception handling, it seems to be swallowing the errors
