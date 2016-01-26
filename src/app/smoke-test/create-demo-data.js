@@ -380,8 +380,8 @@ var createStories = function createStories(inbox, story) {
   }, null, _this);
 };
 
-var createStorieWithTask = function createStorieWithTask(inbox, story) {
-  return _regeneratorRuntime.async(function createStorieWithTask$(context$1$0) {
+var createStoriesWithTasks = function createStoriesWithTasks(inbox, story) {
+  return _regeneratorRuntime.async(function createStoriesWithTasks$(context$1$0) {
     var _this6 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
@@ -409,8 +409,8 @@ var createStorieWithTask = function createStorieWithTask(inbox, story) {
   }, null, _this);
 };
 
-var createStorieWithTest = function createStorieWithTest(inbox, story) {
-  return _regeneratorRuntime.async(function createStorieWithTest$(context$1$0) {
+var createStoriesWithTests = function createStoriesWithTests(inbox, story) {
+  return _regeneratorRuntime.async(function createStoriesWithTests$(context$1$0) {
     var _this7 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
@@ -438,18 +438,28 @@ var createStorieWithTest = function createStorieWithTest(inbox, story) {
   }, null, _this);
 };
 
-var createTestsCommits = function createTestsCommits(inbox, story) {
-  return _regeneratorRuntime.async(function createTestsCommits$(context$1$0) {
+var createStoriesWithTestsAndTasks = function createStoriesWithTestsAndTasks(inbox, story) {
+  var mention;
+  return _regeneratorRuntime.async(function createStoriesWithTestsAndTasks$(context$1$0) {
     var _this8 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        story.Tests.forEach(function callee$1$0(test) {
+        mention = story.StoryId + ' ';
+
+        story.Tests.forEach(function (test) {
+          mention += test + ' ';
+        });
+        story.Tasks.forEach(function (task) {
+          mention += task + ' ';
+        });
+        //4 so we pass the 25 mentions
+        fromZeroTo(4, function callee$1$0(i) {
           var message;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                message = createMessage('' + test, inbox);
+                message = createMessage(mention + ' ' + i, inbox);
                 context$2$0.next = 3;
                 return _regeneratorRuntime.awrap(createCommit(message, inbox));
 
@@ -460,25 +470,25 @@ var createTestsCommits = function createTestsCommits(inbox, story) {
           }, null, _this8);
         });
 
-      case 1:
+      case 4:
       case 'end':
         return context$1$0.stop();
     }
   }, null, _this);
 };
 
-var createTasksCommits = function createTasksCommits(inbox, story) {
-  return _regeneratorRuntime.async(function createTasksCommits$(context$1$0) {
+var createTests = function createTests(inbox, story) {
+  return _regeneratorRuntime.async(function createTests$(context$1$0) {
     var _this9 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
-        story.Tasks.forEach(function callee$1$0(task) {
+        story.Tests.forEach(function callee$1$0(test) {
           var message;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                message = createMessage('' + task, inbox);
+                message = createMessage('' + test, inbox);
                 context$2$0.next = 3;
                 return _regeneratorRuntime.awrap(createCommit(message, inbox));
 
@@ -496,10 +506,39 @@ var createTasksCommits = function createTasksCommits(inbox, story) {
   }, null, _this);
 };
 
+var createTasks = function createTasks(inbox, story) {
+  return _regeneratorRuntime.async(function createTasks$(context$1$0) {
+    var _this10 = this;
+
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        story.Tasks.forEach(function callee$1$0(task) {
+          var message;
+          return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+              case 0:
+                message = createMessage('' + task, inbox);
+                context$2$0.next = 3;
+                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+              case 3:
+              case 'end':
+                return context$2$0.stop();
+            }
+          }, null, _this10);
+        });
+
+      case 1:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
+
 var createMultipleTests = function createMultipleTests(inbox, story) {
   var previousTests;
   return _regeneratorRuntime.async(function createMultipleTests$(context$1$0) {
-    var _this10 = this;
+    var _this11 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -519,7 +558,7 @@ var createMultipleTests = function createMultipleTests(inbox, story) {
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this10);
+          }, null, _this11);
         });
 
       case 2:
@@ -532,7 +571,7 @@ var createMultipleTests = function createMultipleTests(inbox, story) {
 var createMultipleTasks = function createMultipleTasks(inbox, story) {
   var previousTasks;
   return _regeneratorRuntime.async(function createMultipleTasks$(context$1$0) {
-    var _this11 = this;
+    var _this12 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -552,7 +591,7 @@ var createMultipleTasks = function createMultipleTasks(inbox, story) {
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this11);
+          }, null, _this12);
         });
 
       case 2:
@@ -564,24 +603,17 @@ var createMultipleTasks = function createMultipleTasks(inbox, story) {
 
 var create25PerAsset = function create25PerAsset(inbox, story) {
   return _regeneratorRuntime.async(function create25PerAsset$(context$1$0) {
-    var _this13 = this;
+    var _this14 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         console.log('Creating 25 commits per asset.');
         fromZeroTo(25, function callee$1$0(i) {
-          var message;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            var _this12 = this;
+            var _this13 = this;
 
             while (1) switch (context$2$0.prev = context$2$0.next) {
               case 0:
-                message = createMessage(story.StoryId + ' on iteration ' + i, inbox);
-                context$2$0.next = 3;
-                return _regeneratorRuntime.awrap(createCommit(message, inbox));
-
-              case 3:
-
                 story.Tests.forEach(function callee$2$0(test) {
                   var message;
                   return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
@@ -595,7 +627,7 @@ var create25PerAsset = function create25PerAsset(inbox, story) {
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this12);
+                  }, null, _this13);
                 });
 
                 story.Tasks.forEach(function callee$2$0(task) {
@@ -611,14 +643,14 @@ var create25PerAsset = function create25PerAsset(inbox, story) {
                       case 'end':
                         return context$3$0.stop();
                     }
-                  }, null, _this12);
+                  }, null, _this13);
                 });
 
-              case 5:
+              case 2:
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this13);
+          }, null, _this14);
         });
 
       case 2:
@@ -635,14 +667,14 @@ var createInstanceForSample = _ramda2['default'].pipeP(createInstanceAndDigest, 
 var run = function run() {
   var dto;
   return _regeneratorRuntime.async(function run$(context$1$0) {
-    var _this14 = this;
+    var _this15 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         if (_commander2['default'].json) console.log('[');
 
         if (!_commander2['default'].sample) {
-          context$1$0.next = 9;
+          context$1$0.next = 16;
           break;
         }
 
@@ -653,13 +685,19 @@ var run = function run() {
       case 5:
         dto = context$1$0.sent;
 
-        //    mapInboxesAndStories(createStorieWithTask, dto);
-        mapInboxesAndStories(create25PerAsset, dto);
+        mapInboxesAndStories(createStories, dto);
+        mapInboxesAndStories(createStoriesWithTasks, dto);
+        mapInboxesAndStories(createStoriesWithTests, dto);
+        mapInboxesAndStories(createStoriesWithTestsAndTasks, dto);
+        mapInboxesAndStories(createTasks, dto);
+        mapInboxesAndStories(createTests, dto);
+        mapInboxesAndStories(createMultipleTests, dto);
+        mapInboxesAndStories(createMultipleTasks, dto);
 
-        context$1$0.next = 11;
+        context$1$0.next = 18;
         break;
 
-      case 9:
+      case 16:
         console.log('Creating instance with fake data');
         try {
           fromZeroTo(number_of_instances, function callee$1$0(instanceNumber) {
@@ -673,17 +711,17 @@ var run = function run() {
                 case 'end':
                   return context$2$0.stop();
               }
-            }, null, _this14);
+            }, null, _this15);
           });
         } catch (e) {
           // Review exception handling, it seems to be swallowing the errors
           console.log(e);
         }
 
-      case 11:
+      case 18:
         if (_commander2['default'].json) console.log(']');
 
-      case 12:
+      case 19:
       case 'end':
         return context$1$0.stop();
     }

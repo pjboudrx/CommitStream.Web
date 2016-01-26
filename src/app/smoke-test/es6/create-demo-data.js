@@ -123,7 +123,7 @@ let mapInboxesAndStories = async(fun, dto) => {
   let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
 
   dto.inboxes.forEach(async inbox => {
-    sampleWorkItemsToMention.forEach(async(story) => {
+    sampleWorkItemsToMention.forEach(async story => {
       await fun(inbox, story);
     });
   });
@@ -134,29 +134,44 @@ let createStories = async(inbox, story) => {
   await createCommit(message, inbox);
 }
 
-let createStorieWithTask = async(inbox, story) => {
-  story.Tasks.forEach(async(task) => {
+let createStoriesWithTasks = async(inbox, story) => {
+  story.Tasks.forEach(async task => {
     let message = createMessage(`${story.StoryId} ${task}`, inbox)
     await createCommit(message, inbox);
   });
 }
 
-let createStorieWithTest = async(inbox, story) => {
-  story.Tests.forEach(async(test) => {
+let createStoriesWithTests = async(inbox, story) => {
+  story.Tests.forEach(async test => {
     let message = createMessage(`${story.StoryId} ${test}`, inbox)
     await createCommit(message, inbox);
   });
 }
 
-let createTestsCommits = async(inbox, story) => {
-  story.Tests.forEach(async(test) => {
+let createStoriesWithTestsAndTasks = async(inbox, story) => {
+  let mention = `${story.StoryId} `;
+  story.Tests.forEach(test => {
+    mention += test + ' ';
+  });
+  story.Tasks.forEach(task => {
+    mention += task + ' ';
+  });
+  //4 so we pass the 25 mentions
+  fromZeroTo(4, async i => {
+    let message = createMessage(`${mention} ${i}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
+
+let createTests = async(inbox, story) => {
+  story.Tests.forEach(async test => {
     let message = createMessage(`${test}`, inbox)
     await createCommit(message, inbox);
   });
 }
 
-let createTasksCommits = async(inbox, story) => {
-  story.Tasks.forEach(async(task) => {
+let createTasks = async(inbox, story) => {
+  story.Tasks.forEach(async task => {
     let message = createMessage(`${task}`, inbox)
     await createCommit(message, inbox);
   });
@@ -164,7 +179,7 @@ let createTasksCommits = async(inbox, story) => {
 
 let createMultipleTests = async(inbox, story) => {
   let previousTests = '';
-  story.Tests.forEach(async(test) => {
+  story.Tests.forEach(async test => {
     previousTests += test + ' ';
     let message = createMessage(`${previousTests}`, inbox)
     await createCommit(message, inbox);
@@ -173,7 +188,7 @@ let createMultipleTests = async(inbox, story) => {
 
 let createMultipleTasks = async(inbox, story) => {
   let previousTasks = '';
-  story.Tasks.forEach(async(task) => {
+  story.Tasks.forEach(async task => {
     previousTasks += task + ' ';
     let message = createMessage(`${previousTasks}`, inbox)
     await createCommit(message, inbox);
@@ -183,15 +198,12 @@ let createMultipleTasks = async(inbox, story) => {
 let create25PerAsset = async(inbox, story) => {
   console.log('Creating 25 commits per asset.');
   fromZeroTo(25, async i => {
-    let message = createMessage(`${story.StoryId} on iteration ${i}`, inbox);
-    await createCommit(message, inbox);
-
-    story.Tests.forEach(async(test) => {
+    story.Tests.forEach(async test => {
       let message = createMessage(`${test} on iteration ${i}`, inbox)
       await createCommit(message, inbox);
     });
 
-    story.Tasks.forEach(async(task) => {
+    story.Tasks.forEach(async task => {
       let message = createMessage(`${task} on iteration ${i}`, inbox)
       await createCommit(message, inbox);
     });
@@ -217,8 +229,15 @@ let run = async() => {
   if (program.sample) {
     console.log('Creating instance with sample data');
     let dto = await createInstanceForSample('Sample');
-    //    mapInboxesAndStories(createStorieWithTask, dto);
-    mapInboxesAndStories(create25PerAsset, dto);
+
+    mapInboxesAndStories(createStories, dto);
+    mapInboxesAndStories(createStoriesWithTasks, dto);
+    mapInboxesAndStories(createStoriesWithTests, dto);
+    mapInboxesAndStories(createStoriesWithTestsAndTasks, dto);
+    mapInboxesAndStories(createTasks, dto);
+    mapInboxesAndStories(createTests, dto);
+    mapInboxesAndStories(createMultipleTests, dto);
+    mapInboxesAndStories(createMultipleTasks, dto);
 
   } else {
     console.log('Creating instance with fake data');
