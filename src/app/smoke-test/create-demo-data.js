@@ -562,6 +562,72 @@ var createMultipleTasks = function createMultipleTasks(inbox, story) {
   }, null, _this);
 };
 
+var create25PerAsset = function create25PerAsset(inbox, story) {
+  return _regeneratorRuntime.async(function create25PerAsset$(context$1$0) {
+    var _this13 = this;
+
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        console.log('Creating 25 commits per asset.');
+        fromZeroTo(25, function callee$1$0(i) {
+          var message;
+          return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
+            var _this12 = this;
+
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+              case 0:
+                message = createMessage(story.StoryId + ' on iteration ' + i, inbox);
+                context$2$0.next = 3;
+                return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+              case 3:
+
+                story.Tests.forEach(function callee$2$0(test) {
+                  var message;
+                  return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
+                    while (1) switch (context$3$0.prev = context$3$0.next) {
+                      case 0:
+                        message = createMessage(test + ' on iteration ' + i, inbox);
+                        context$3$0.next = 3;
+                        return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+                      case 3:
+                      case 'end':
+                        return context$3$0.stop();
+                    }
+                  }, null, _this12);
+                });
+
+                story.Tasks.forEach(function callee$2$0(task) {
+                  var message;
+                  return _regeneratorRuntime.async(function callee$2$0$(context$3$0) {
+                    while (1) switch (context$3$0.prev = context$3$0.next) {
+                      case 0:
+                        message = createMessage(task + ' on iteration ' + i, inbox);
+                        context$3$0.next = 3;
+                        return _regeneratorRuntime.awrap(createCommit(message, inbox));
+
+                      case 3:
+                      case 'end':
+                        return context$3$0.stop();
+                    }
+                  }, null, _this12);
+                });
+
+              case 5:
+              case 'end':
+                return context$2$0.stop();
+            }
+          }, null, _this13);
+        });
+
+      case 2:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
+
 var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes, createFakeCommits);
 
 var createInstanceForSample = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
@@ -569,7 +635,7 @@ var createInstanceForSample = _ramda2['default'].pipeP(createInstanceAndDigest, 
 var run = function run() {
   var dto;
   return _regeneratorRuntime.async(function run$(context$1$0) {
-    var _this12 = this;
+    var _this14 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -587,7 +653,8 @@ var run = function run() {
       case 5:
         dto = context$1$0.sent;
 
-        mapInboxesAndStories(createStorieWithTask, dto);
+        //    mapInboxesAndStories(createStorieWithTask, dto);
+        mapInboxesAndStories(create25PerAsset, dto);
 
         context$1$0.next = 11;
         break;
@@ -595,7 +662,7 @@ var run = function run() {
       case 9:
         console.log('Creating instance with fake data');
         try {
-          _ramda2['default'].map(function callee$1$0(instanceNumber) {
+          fromZeroTo(number_of_instances, function callee$1$0(instanceNumber) {
             return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
               while (1) switch (context$2$0.prev = context$2$0.next) {
                 case 0:
@@ -606,8 +673,8 @@ var run = function run() {
                 case 'end':
                   return context$2$0.stop();
               }
-            }, null, _this12);
-          }, _ramda2['default'].range(0, number_of_instances));
+            }, null, _this14);
+          });
         } catch (e) {
           // Review exception handling, it seems to be swallowing the errors
           console.log(e);

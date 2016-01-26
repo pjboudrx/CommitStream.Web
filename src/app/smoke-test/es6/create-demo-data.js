@@ -171,12 +171,30 @@ let createMultipleTests = async(inbox, story) => {
   });
 }
 
-let createMultipleTasks = async (inbox,story) => {
+let createMultipleTasks = async(inbox, story) => {
   let previousTasks = '';
   story.Tasks.forEach(async(task) => {
     previousTasks += task + ' ';
     let message = createMessage(`${previousTasks}`, inbox)
     await createCommit(message, inbox);
+  });
+}
+
+let create25PerAsset = async(inbox, story) => {
+  console.log('Creating 25 commits per asset.');
+  fromZeroTo(25, async i => {
+    let message = createMessage(`${story.StoryId} on iteration ${i}`, inbox);
+    await createCommit(message, inbox);
+
+    story.Tests.forEach(async(test) => {
+      let message = createMessage(`${test} on iteration ${i}`, inbox)
+      await createCommit(message, inbox);
+    });
+
+    story.Tasks.forEach(async(task) => {
+      let message = createMessage(`${task} on iteration ${i}`, inbox)
+      await createCommit(message, inbox);
+    });
   });
 }
 
@@ -199,17 +217,15 @@ let run = async() => {
   if (program.sample) {
     console.log('Creating instance with sample data');
     let dto = await createInstanceForSample('Sample');
-    mapInboxesAndStories(createStorieWithTask, dto);
-
-
+    //    mapInboxesAndStories(createStorieWithTask, dto);
+    mapInboxesAndStories(create25PerAsset, dto);
 
   } else {
     console.log('Creating instance with fake data');
     try {
-      R.map(async(instanceNumber) => {
+      fromZeroTo(number_of_instances, async(instanceNumber) => {
         await createInstanceWithFakeData(instanceNumber);
-      }, R.range(0, number_of_instances));
-
+      });
     } catch (e) {
       // Review exception handling, it seems to be swallowing the errors
       console.log(e);
