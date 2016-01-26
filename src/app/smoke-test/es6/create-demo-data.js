@@ -33,7 +33,7 @@ let getFromJsonFile = async(fileName) => {
 }
 
 let createMessage = (mention, inbox) => {
-  return `${mention} in  ${inbox.inboxId} of family = ${inbox.family}`;
+  return `${mention} in ${inbox.inboxId} of family = ${inbox.family}`;
 }
 
 let createCommit = async(message, inbox) => {
@@ -43,12 +43,9 @@ let createCommit = async(message, inbox) => {
   }
 }
 
-// :'( https://github.com/zenparsing/async-iteration/
-let mapP = async(fun, iterator) => {
-  let element = await iterator.next();
-  while (!element.done) {
-    fun(element.value);
-    element = await iterator.next();
+let fromZeroTo = (top, fun) => {
+  for (let i = 0; i < top; i++) {
+    fun(i);
   }
 }
 
@@ -87,75 +84,22 @@ let getInboxesToCreate = async dto => {
   return dto;
 }
 
-let createInboxes = async function*(dto) {
+let createInboxes = async dto => {
+  dto.inboxes = [];
   for (let inboxToCreate of dto.inboxesToCreate) {
-    dto.inbox = await dto.digest.inboxCreate(inboxToCreate)
-    yield dto;
+    let inbox = await dto.digest.inboxCreate(inboxToCreate);
+    dto.inboxes.push(inbox);
   }
+  return dto;
 };
 
-let createSampleCommits = async dtoAsyncIterator => {
-  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
-
-  mapP(async dto => {
-    let inbox = dto.inbox;
-    sampleWorkItemsToMention.forEach(async(story) => {
-      let message = createMessage(story.StoryId, inbox);
-      await createCommit(message, inbox);
-
-      story.Tests.forEach(async(test) => {
-        let message = createMessage(`${story.StoryId} ${test}`, inbox)
-        await createCommit(message, inbox);
-      });
-
-      story.Tasks.forEach(async(task) => {
-        let message = createMessage(`${story.StoryId} ${task}`, inbox)
-        await createCommit(message, inbox);
-      });
-    });
-  }, dtoAsyncIterator);
-
-}
-
-let createSampleTestsCommits = async dtoAsyncIterator => {
-  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
-
-  mapP(async dto => {
-    let inbox = dto.inbox;
-    sampleWorkItemsToMention.forEach(async(story) => {
-      story.Tests.forEach(async(test) => {
-        let message = createMessage(`${story.StoryId} ${test}`, inbox)
-        await createCommit(message, inbox);
-      });
-    });
-
-  }, dtoAsyncIterator);
-
-}
-
-let createSampleTasksCommits = async dtoAsyncIterator => {
-  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
-
-  mapP(async dto => {
-    let inbox = dto.inbox;
-    sampleWorkItemsToMention.forEach(async(story) => {
-      story.Tasks.forEach(async(task) => {
-        let message = createMessage(`${story.StoryId} ${task}`, inbox)
-        await createCommit(message, inbox);
-      });
-    });
-  }, dtoAsyncIterator);
-
-}
-
-let createFakeCommits = async dtoAsyncIterator => {
+let createFakeCommits = async dto => {
   let inboxNum = 0;
   let workItemsToMention = await getFromJsonFile(fake_work_items_to_mention);
 
-  R.map(async iteration => {
-    mapP(async dto => {
+  fromZeroTo(number_of_repo_iterations, async iteration => {
+    dto.inboxes.forEach(inbox => {
       let digest = dto.digest;
-      let inbox = dto.inbox;
       let workItemsGroup = workItemsToMention[inboxNum % 4];
       let comma = (iteration === 0 && inboxNum === 0) ? '' : ',';
       inboxNum++;
@@ -164,22 +108,77 @@ let createFakeCommits = async dtoAsyncIterator => {
         console.log(`${inbox._links['add-commit'].href}?apiKey=${client.apiKey}`);
       } else console.log(`${comma}"${client.baseUrl}/${client.instanceId}/commits/tags/versionone/workitem?numbers=${workItemsGroup.join(',')}&apiKey=${client.apiKey}"`);
       for (let workItem of workItemsGroup) {
-        R.map(async mentionNum => {
+        fromZeroTo(number_of_mentions_per_workitem_per_repo, async mentionNum => {
           let message = `${workItem} mention # ${mentionNum} on ${iteration} in  ${inbox.inboxId} of family = ${inbox.family}`;
-          createCommit(message, inbox);
-        }, R.range(0, number_of_mentions_per_workitem_per_repo));
+          await createCommit(message, inbox);
+        });
       }
-    }, dtoAsyncIterator);
+    });
 
-  }, R.range(0, number_of_repo_iterations));
+  });
+
 }
 
-let createInstanceWithSampleData = R.pipeP(
-  createInstanceAndDigest,
-  getInboxesToCreate,
-  createInboxes,
-  createSampleCommits
-);
+let mapInboxesAndStories = async(fun, dto) => {
+  let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
+
+  dto.inboxes.forEach(async inbox => {
+    sampleWorkItemsToMention.forEach(async(story) => {
+      await fun(inbox, story);
+    });
+  });
+}
+
+let createStories = async(inbox, story) => {
+  let message = createMessage(story.StoryId, inbox);
+  await createCommit(message, inbox);
+}
+
+let createStorieWithTask = async(inbox, story) => {
+  story.Tasks.forEach(async(task) => {
+    let message = createMessage(`${story.StoryId} ${task}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
+
+let createStorieWithTest = async(inbox, story) => {
+  story.Tests.forEach(async(test) => {
+    let message = createMessage(`${story.StoryId} ${test}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
+
+let createTestsCommits = async(inbox, story) => {
+  story.Tests.forEach(async(test) => {
+    let message = createMessage(`${test}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
+
+let createTasksCommits = async(inbox, story) => {
+  story.Tasks.forEach(async(task) => {
+    let message = createMessage(`${task}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
+
+let createMultipleTests = async(inbox, story) => {
+  let previousTests = '';
+  story.Tests.forEach(async(test) => {
+    previousTests += test + ' ';
+    let message = createMessage(`${previousTests}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
+
+let createMultipleTasks = async (inbox,story) => {
+  let previousTasks = '';
+  story.Tasks.forEach(async(task) => {
+    previousTasks += task + ' ';
+    let message = createMessage(`${previousTasks}`, inbox)
+    await createCommit(message, inbox);
+  });
+}
 
 let createInstanceWithFakeData = R.pipeP(
   createInstanceAndDigest,
@@ -188,13 +187,21 @@ let createInstanceWithFakeData = R.pipeP(
   createFakeCommits
 );
 
+let createInstanceForSample = R.pipeP(
+  createInstanceAndDigest,
+  getInboxesToCreate,
+  createInboxes
+);
+
 let run = async() => {
   if (program.json) console.log('[');
 
   if (program.sample) {
     console.log('Creating instance with sample data');
-    let iteration = (new Date()).toGMTString();
-    await createInstanceWithSampleData(iteration);
+    let dto = await createInstanceForSample('Sample');
+    mapInboxesAndStories(createStorieWithTask, dto);
+
+
 
   } else {
     console.log('Creating instance with fake data');
