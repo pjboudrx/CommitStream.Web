@@ -43,9 +43,9 @@ let createCommit = async(message, inbox) => {
   }
 }
 
-let fromZeroTo = (top, fun) => {
+let fromZeroTo = async(top, fun) => {
   for (let i = 0; i < top; i++) {
-    fun(i);
+    await fun(i);
   }
 }
 
@@ -114,19 +114,17 @@ let createFakeCommits = async dto => {
         });
       }
     });
-
   });
 
 }
 
 let mapInboxesAndStories = async(fun, dto) => {
   let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
-
-  dto.inboxes.forEach(async inbox => {
-    sampleWorkItemsToMention.forEach(async story => {
+  for (let inbox of dto.inboxes) {
+    for (let story of sampleWorkItemsToMention) {
       await fun(inbox, story);
-    });
-  });
+    }
+  }
 }
 
 let createStories = async(inbox, story) => {
@@ -135,78 +133,78 @@ let createStories = async(inbox, story) => {
 }
 
 let createStoriesWithTasks = async(inbox, story) => {
-  story.Tasks.forEach(async task => {
+  for (let task of story.Tasks) {
     let message = createMessage(`${story.StoryId} ${task}`, inbox)
     await createCommit(message, inbox);
-  });
+  }
 }
 
 let createStoriesWithTests = async(inbox, story) => {
-  story.Tests.forEach(async test => {
+  for (let test of story.Tests) {
     let message = createMessage(`${story.StoryId} ${test}`, inbox)
     await createCommit(message, inbox);
-  });
+  }
 }
 
 let createStoriesWithTestsAndTasks = async(inbox, story) => {
   let mention = `${story.StoryId} `;
-  story.Tests.forEach(test => {
+  for (let test of story.Tests) {
     mention += test + ' ';
-  });
-  story.Tasks.forEach(task => {
+  }
+  for (let task of story.Tasks) {
     mention += task + ' ';
-  });
+  }
   //4 so we pass the 25 mentions
-  fromZeroTo(4, async i => {
+  await fromZeroTo(4, async i => {
     let message = createMessage(`${mention} ${i}`, inbox)
     await createCommit(message, inbox);
   });
 }
 
 let createTests = async(inbox, story) => {
-  story.Tests.forEach(async test => {
+  for (let test of story.Tests) {
     let message = createMessage(`${test}`, inbox)
     await createCommit(message, inbox);
-  });
+  }
 }
 
 let createTasks = async(inbox, story) => {
-  story.Tasks.forEach(async task => {
+  for (let task of story.Tasks) {
     let message = createMessage(`${task}`, inbox)
     await createCommit(message, inbox);
-  });
+  }
 }
 
 let createMultipleTests = async(inbox, story) => {
   let previousTests = '';
-  story.Tests.forEach(async test => {
+  for (let test of story.Tests) {
     previousTests += test + ' ';
     let message = createMessage(`${previousTests}`, inbox)
     await createCommit(message, inbox);
-  });
+  }
 }
 
 let createMultipleTasks = async(inbox, story) => {
   let previousTasks = '';
-  story.Tasks.forEach(async task => {
+  for (let task of story.Tasks) {
     previousTasks += task + ' ';
     let message = createMessage(`${previousTasks}`, inbox)
     await createCommit(message, inbox);
-  });
+  }
 }
 
 let create25PerAsset = async(inbox, story) => {
   console.log('Creating 25 commits per asset.');
-  fromZeroTo(25, async i => {
-    story.Tests.forEach(async test => {
+  await fromZeroTo(25, async i => {
+    for (let test of story.Tests) {
       let message = createMessage(`${test} on iteration ${i}`, inbox)
       await createCommit(message, inbox);
-    });
+    }
 
-    story.Tasks.forEach(async task => {
+    for (let task of story.Tasks) {
       let message = createMessage(`${task} on iteration ${i}`, inbox)
       await createCommit(message, inbox);
-    });
+    };
   });
 }
 
@@ -224,38 +222,31 @@ let createInstanceForSample = R.pipeP(
 );
 
 let run = async() => {
-  if (program.json) console.log('[');
+  try {
+    if (program.json) console.log('[');
 
-  if (program.sample) {
-    console.log('Creating instance with sample data');
-    let dto = await createInstanceForSample('Sample');
+    if (program.sample) {
+      console.log('Creating instance with sample data');
+      let dto = await createInstanceForSample('Sample');
+      await mapInboxesAndStories(createStories, dto);
+      await mapInboxesAndStories(createStoriesWithTasks, dto);
+      await mapInboxesAndStories(createStoriesWithTests, dto);
+      await mapInboxesAndStories(createStoriesWithTestsAndTasks, dto);
+      await mapInboxesAndStories(createTasks, dto);
+      await mapInboxesAndStories(createTests, dto);
+      await mapInboxesAndStories(createMultipleTests, dto);
+      await mapInboxesAndStories(createMultipleTasks, dto);
 
-    mapInboxesAndStories(createStories, dto);
-    mapInboxesAndStories(createStoriesWithTasks, dto);
-    mapInboxesAndStories(createStoriesWithTests, dto);
-    mapInboxesAndStories(createStoriesWithTestsAndTasks, dto);
-    mapInboxesAndStories(createTasks, dto);
-    mapInboxesAndStories(createTests, dto);
-    mapInboxesAndStories(createMultipleTests, dto);
-    mapInboxesAndStories(createMultipleTasks, dto);
-
-  } else {
-    console.log('Creating instance with fake data');
-    try {
+    } else {
+      console.log('Creating instance with fake data');
       fromZeroTo(number_of_instances, async(instanceNumber) => {
         await createInstanceWithFakeData(instanceNumber);
       });
-    } catch (e) {
-      // Review exception handling, it seems to be swallowing the errors
-      console.log(e);
     }
-
+    if (program.json) console.log(']');
+  } catch (e) {
+    console.log(e);
   }
-  if (program.json) console.log(']');
 }
 
-try {
-  run();
-} catch (e) {
-  console.log(e);
-}
+run();
