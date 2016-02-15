@@ -59,7 +59,7 @@ let get = (client, uri, alreadyAbsolute) => {
     headers: {
       'Content-Type': 'application/json'
     }
-  }    
+  }
 };
 
 let postToInboxForFamily = (client, inbox, message, family, extraHeaders) => {
@@ -90,6 +90,10 @@ class CSApiClient {
   }
   async instanceCreate() {
     return await Instance.create(this);
+  }
+
+  getInbox(inbox)  {
+    return new Inbox(this, inbox);
   }
   get apiKey() { return this._apiKey; }
   set apiKey(val) { this._apiKey = val; }

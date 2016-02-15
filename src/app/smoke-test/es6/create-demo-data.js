@@ -22,6 +22,7 @@ const number_of_repo_iterations = parseInt(program.repos);
 const number_of_mentions_per_workitem_per_repo = parseInt(program.mentions);
 const sample_work_items_to_mention = 'sampleWorkItemsToMention.json';
 const fake_work_items_to_mention = 'fakeWorkItemsToMention.json';
+const v1_inboxes = 'inboxes.json';
 
 let client = new CSApiClient(program.url);
 
@@ -118,9 +119,9 @@ let createFakeCommits = async dto => {
 
 }
 
-let mapInboxesAndStories = async(fun, dto) => {
+let mapInboxesAndStories = async(fun, inboxes) => {
   let sampleWorkItemsToMention = await getFromJsonFile(sample_work_items_to_mention);
-  for (let inbox of dto.inboxes) {
+  for (let inbox of inboxes) {
     for (let story of sampleWorkItemsToMention) {
       await fun(inbox, story);
     }
@@ -215,11 +216,11 @@ let createInstanceWithFakeData = R.pipeP(
   createFakeCommits
 );
 
-let createInstanceForSample = R.pipeP(
-  createInstanceAndDigest,
-  getInboxesToCreate,
-  createInboxes
-);
+let getV1Inboxes = async () =>{
+  let inboxes =  await getFromJsonFile(v1_inboxes);
+  inboxes = R.map(i => i = client.getInbox(i), inboxes);
+  return inboxes;
+}
 
 let run = async() => {
   try {
@@ -227,16 +228,15 @@ let run = async() => {
 
     if (program.sample) {
       console.log('Creating instance with sample data');
-      let dto = await createInstanceForSample('Sample');
-      await mapInboxesAndStories(createStories, dto);
-      await mapInboxesAndStories(createStoriesWithTasks, dto);
-      await mapInboxesAndStories(createStoriesWithTests, dto);
-      await mapInboxesAndStories(createStoriesWithTestsAndTasks, dto);
-      await mapInboxesAndStories(createTasks, dto);
-      await mapInboxesAndStories(createTests, dto);
-      await mapInboxesAndStories(createMultipleTests, dto);
-      await mapInboxesAndStories(createMultipleTasks, dto);
-
+      let inboxes = await getV1Inboxes();
+      await mapInboxesAndStories(createStories, inboxes);
+      await mapInboxesAndStories(createStoriesWithTasks, inboxes);
+      await mapInboxesAndStories(createStoriesWithTests, inboxes);
+      await mapInboxesAndStories(createStoriesWithTestsAndTasks, inboxes);
+      await mapInboxesAndStories(createTasks, inboxes);
+      await mapInboxesAndStories(createTests, inboxes);
+      await mapInboxesAndStories(createMultipleTests, inboxes);
+      await mapInboxesAndStories(createMultipleTasks, inboxes);
     } else {
       console.log('Creating instance with fake data');
       fromZeroTo(number_of_instances, async(instanceNumber) => {

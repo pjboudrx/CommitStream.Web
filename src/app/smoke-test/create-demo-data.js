@@ -33,6 +33,7 @@ var number_of_repo_iterations = parseInt(_commander2['default'].repos);
 var number_of_mentions_per_workitem_per_repo = parseInt(_commander2['default'].mentions);
 var sample_work_items_to_mention = 'sampleWorkItemsToMention.json';
 var fake_work_items_to_mention = 'fakeWorkItemsToMention.json';
+var v1_inboxes = 'inboxes.json';
 
 var client = new _libCsApiClient2['default'](_commander2['default'].url);
 
@@ -339,7 +340,7 @@ var createFakeCommits = function createFakeCommits(dto) {
   }, null, _this);
 };
 
-var mapInboxesAndStories = function mapInboxesAndStories(fun, dto) {
+var mapInboxesAndStories = function mapInboxesAndStories(fun, inboxes) {
   var sampleWorkItemsToMention, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, inbox, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, story;
 
   return _regeneratorRuntime.async(function mapInboxesAndStories$(context$1$0) {
@@ -354,7 +355,7 @@ var mapInboxesAndStories = function mapInboxesAndStories(fun, dto) {
         _didIteratorError3 = false;
         _iteratorError3 = undefined;
         context$1$0.prev = 6;
-        _iterator3 = _getIterator(dto.inboxes);
+        _iterator3 = _getIterator(inboxes);
 
       case 8:
         if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
@@ -1167,10 +1168,31 @@ var create25PerAsset = function create25PerAsset(inbox, story) {
 
 var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes, createFakeCommits);
 
-var createInstanceForSample = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes);
+var getV1Inboxes = function getV1Inboxes() {
+  var inboxes;
+  return _regeneratorRuntime.async(function getV1Inboxes$(context$1$0) {
+    while (1) switch (context$1$0.prev = context$1$0.next) {
+      case 0:
+        context$1$0.next = 2;
+        return _regeneratorRuntime.awrap(getFromJsonFile(v1_inboxes));
+
+      case 2:
+        inboxes = context$1$0.sent;
+
+        inboxes = _ramda2['default'].map(function (i) {
+          return i = client.getInbox(i);
+        }, inboxes);
+        return context$1$0.abrupt('return', inboxes);
+
+      case 5:
+      case 'end':
+        return context$1$0.stop();
+    }
+  }, null, _this);
+};
 
 var run = function run() {
-  var dto;
+  var inboxes;
   return _regeneratorRuntime.async(function run$(context$1$0) {
     var _this6 = this;
 
@@ -1187,40 +1209,40 @@ var run = function run() {
 
         console.log('Creating instance with sample data');
         context$1$0.next = 6;
-        return _regeneratorRuntime.awrap(createInstanceForSample('Sample'));
+        return _regeneratorRuntime.awrap(getV1Inboxes());
 
       case 6:
-        dto = context$1$0.sent;
+        inboxes = context$1$0.sent;
         context$1$0.next = 9;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStories, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStories, inboxes));
 
       case 9:
         context$1$0.next = 11;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStoriesWithTasks, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStoriesWithTasks, inboxes));
 
       case 11:
         context$1$0.next = 13;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStoriesWithTests, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStoriesWithTests, inboxes));
 
       case 13:
         context$1$0.next = 15;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStoriesWithTestsAndTasks, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createStoriesWithTestsAndTasks, inboxes));
 
       case 15:
         context$1$0.next = 17;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createTasks, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createTasks, inboxes));
 
       case 17:
         context$1$0.next = 19;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createTests, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createTests, inboxes));
 
       case 19:
         context$1$0.next = 21;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createMultipleTests, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createMultipleTests, inboxes));
 
       case 21:
         context$1$0.next = 23;
-        return _regeneratorRuntime.awrap(mapInboxesAndStories(createMultipleTasks, dto));
+        return _regeneratorRuntime.awrap(mapInboxesAndStories(createMultipleTasks, inboxes));
 
       case 23:
         context$1$0.next = 27;

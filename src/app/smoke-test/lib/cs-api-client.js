@@ -164,6 +164,11 @@ var CSApiClient = (function () {
       }, null, this);
     }
   }, {
+    key: 'getInbox',
+    value: function getInbox(inbox) {
+      return new Inbox(this, inbox);
+    }
+  }, {
     key: 'href',
     value: function href(path) {
       return '' + this.baseUrl + path;
