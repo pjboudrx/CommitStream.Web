@@ -4,7 +4,7 @@ import program from 'commander';
 import CSApiClient from './lib/cs-api-client';
 import R from 'ramda';
 import Promise from 'bluebird';
-let readFile = Promise.promisify(require("fs").readFile);
+import fs from 'fs';
 
 program
   .version('0.0.0')
@@ -24,6 +24,7 @@ const number_of_mentions_per_workitem_per_repo = parseInt(program.mentions);
 const sample_work_items_to_mention = 'sampleWorkItemsToMention.json';
 const fake_work_items_to_mention = 'fakeWorkItemsToMention.json';
 const v1_inboxes = 'inboxes.json';
+const readFile = Promise.promisify(fs.readFile);
 
 let client = new CSApiClient(program.url);
 
@@ -38,7 +39,7 @@ let createMessage = (mention, inbox) => {
   return `${mention} in ${inbox.inboxId} of family = ${inbox.family}`;
 }
 
-let createCommit = async(message, inbox) => {  
+let createCommit = async(message, inbox) => {
   let commitAddResponse = await inbox.commitCreate(message, program.repourl);
   if (program.debug) {
     console.log(commitAddResponse.message);

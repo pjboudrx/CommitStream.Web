@@ -24,7 +24,9 @@ var _bluebird = require('bluebird');
 
 var _bluebird2 = _interopRequireDefault(_bluebird);
 
-var readFile = _bluebird2['default'].promisify(require("fs").readFile);
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
 
 _commander2['default'].version('0.0.0').option('-u, --url [url]', 'The base URL for the CommitStream Service API, default: http://localhost:6565/api', 'http://localhost:6565/api').option('-i, --instances [number]', 'Number of instances to create, default: 1', 1).option('-r, --repos [number]', 'Number of repos creation iterations to run (creates one repo per family type during each iteration), default 1', 1).option('-m, --mentions [number]', 'Number of times to post a commit with each mention (one story, 5 tasks, 5 tests in each group of workitems), default 1', 1).option('-d, --debug', 'Show results of each commit, not just summary information').option('-j, --json', 'Log only the JSON output with all the query URLs needed for the performance client').option('-s, --sample', 'Create the commits with sample data that exists in the PR builds', 0).option('--repourl [repourl]', 'Specifies the repository url that is going to be used in the commits').parse(process.argv);
 
@@ -34,6 +36,7 @@ var number_of_mentions_per_workitem_per_repo = parseInt(_commander2['default'].m
 var sample_work_items_to_mention = 'sampleWorkItemsToMention.json';
 var fake_work_items_to_mention = 'fakeWorkItemsToMention.json';
 var v1_inboxes = 'inboxes.json';
+var readFile = _bluebird2['default'].promisify(_fs2['default'].readFile);
 
 var client = new _libCsApiClient2['default'](_commander2['default'].url);
 
