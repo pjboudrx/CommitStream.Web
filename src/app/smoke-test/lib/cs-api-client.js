@@ -101,33 +101,37 @@ var get = function get(client, uri, alreadyAbsolute) {
   };
 };
 
-var postToInboxForFamily = function postToInboxForFamily(client, inbox, message, family, extraHeaders) {
-  return _postToLink(client, inbox, 'add-commit', _familyPayloadExamples2['default'][family].validWithOneCommit(message), extraHeaders);
+var postToInboxForFamily = function postToInboxForFamily(client, inbox, message, repoUrl, family, extraHeaders) {
+  return _postToLink(client, inbox, 'add-commit', _familyPayloadExamples2['default'][family].validWithOneCommit(message, repoUrl), extraHeaders);
 };
 
 var families = {
   GitHub: {
     commitAdd: function commitAdd(client, inbox) {
       var message = arguments.length <= 2 || arguments[2] === undefined ? 'GitHub commit' : arguments[2];
-      return postToInboxForFamily(client, inbox, message, 'GitHub', { 'x-github-event': 'push' });
+      var repoUrl = arguments.length <= 3 || arguments[3] === undefined ? 'https://github.com/openAgile/CommitStream.Web' : arguments[3];
+      return postToInboxForFamily(client, inbox, message, repoUrl, 'GitHub', { 'x-github-event': 'push' });
     }
   },
   GitLab: {
     commitAdd: function commitAdd(client, inbox) {
       var message = arguments.length <= 2 || arguments[2] === undefined ? 'GitLab commit' : arguments[2];
-      return postToInboxForFamily(client, inbox, message, 'GitLab', { 'x-gitlab-event': 'Push Hook' });
+      var repoUrl = arguments.length <= 3 || arguments[3] === undefined ? 'https://github.com/openAgile/CommitStream.Web' : arguments[3];
+      return postToInboxForFamily(client, inbox, message, repoUrl, 'GitLab', { 'x-gitlab-event': 'Push Hook' });
     }
   },
   Bitbucket: {
     commitAdd: function commitAdd(client, inbox) {
       var message = arguments.length <= 2 || arguments[2] === undefined ? 'Bitbucket commit' : arguments[2];
-      return postToInboxForFamily(client, inbox, message, 'Bitbucket', { 'x-event-key': 'repo:push' });
+      var repoUrl = arguments.length <= 3 || arguments[3] === undefined ? 'https://github.com/openAgile/CommitStream.Web' : arguments[3];
+      return postToInboxForFamily(client, inbox, message, repoUrl, 'Bitbucket', { 'x-event-key': 'repo:push' });
     }
   },
   VsoGit: {
     commitAdd: function commitAdd(client, inbox) {
       var message = arguments.length <= 2 || arguments[2] === undefined ? 'VsoGit commit' : arguments[2];
-      return postToInboxForFamily(client, inbox, message, 'VsoGit');
+      var repoUrl = arguments.length <= 3 || arguments[3] === undefined ? 'https://github.com/openAgile/CommitStream.Web' : arguments[3];
+      return postToInboxForFamily(client, inbox, message, repoUrl, 'VsoGit');
     }
   }
 };
@@ -354,13 +358,13 @@ var Inbox = (function (_Resource3) {
 
   _createClass(Inbox, [{
     key: 'commitCreate',
-    value: function commitCreate(message) {
+    value: function commitCreate(message, repoUrl) {
       var commitResponse;
       return _regeneratorRuntime.async(function commitCreate$(context$2$0) {
         while (1) switch (context$2$0.prev = context$2$0.next) {
           case 0:
             context$2$0.next = 2;
-            return _regeneratorRuntime.awrap(families[this.family].commitAdd(this[clientSymbol], this[resourceSymbol], message));
+            return _regeneratorRuntime.awrap(families[this.family].commitAdd(this[clientSymbol], this[resourceSymbol], message, repoUrl));
 
           case 2:
             commitResponse = context$2$0.sent;

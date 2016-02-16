@@ -26,7 +26,7 @@ var _bluebird2 = _interopRequireDefault(_bluebird);
 
 var readFile = _bluebird2['default'].promisify(require("fs").readFile);
 
-_commander2['default'].version('0.0.0').option('-u, --url [url]', 'The base URL for the CommitStream Service API, default: http://localhost:6565/api', 'http://localhost:6565/api').option('-i, --instances [number]', 'Number of instances to create, default: 1', 1).option('-r, --repos [number]', 'Number of repos creation iterations to run (creates one repo per family type during each iteration), default 1', 1).option('-m, --mentions [number]', 'Number of times to post a commit with each mention (one story, 5 tasks, 5 tests in each group of workitems), default 1', 1).option('-d, --debug', 'Show results of each commit, not just summary information').option('-j, --json', 'Log only the JSON output with all the query URLs needed for the performance client').option('-s, --sample', 'Create the commits with sample data that exists in the PR builds', 0).parse(process.argv);
+_commander2['default'].version('0.0.0').option('-u, --url [url]', 'The base URL for the CommitStream Service API, default: http://localhost:6565/api', 'http://localhost:6565/api').option('-i, --instances [number]', 'Number of instances to create, default: 1', 1).option('-r, --repos [number]', 'Number of repos creation iterations to run (creates one repo per family type during each iteration), default 1', 1).option('-m, --mentions [number]', 'Number of times to post a commit with each mention (one story, 5 tasks, 5 tests in each group of workitems), default 1', 1).option('-d, --debug', 'Show results of each commit, not just summary information').option('-j, --json', 'Log only the JSON output with all the query URLs needed for the performance client').option('-s, --sample', 'Create the commits with sample data that exists in the PR builds', 0).option('--repourl [repourl]', 'Specifies the repository url that is going to be used in the commits').parse(process.argv);
 
 var number_of_instances = parseInt(_commander2['default'].instances);
 var number_of_repo_iterations = parseInt(_commander2['default'].repos);
@@ -68,7 +68,7 @@ var createCommit = function createCommit(message, inbox) {
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
         context$1$0.next = 2;
-        return _regeneratorRuntime.awrap(inbox.commitCreate(message));
+        return _regeneratorRuntime.awrap(inbox.commitCreate(message, _commander2['default'].repourl));
 
       case 2:
         commitAddResponse = context$1$0.sent;
@@ -136,7 +136,8 @@ var createInstanceAndDigest = function createInstanceAndDigest(iteration) {
         }
 
         return context$1$0.abrupt('return', {
-          iteration: iteration, digest: digest
+          iteration: iteration,
+          digest: digest
         });
 
       case 8:
@@ -1180,7 +1181,9 @@ var getV1Inboxes = function getV1Inboxes() {
         inboxes = context$1$0.sent;
 
         inboxes = _ramda2['default'].map(function (i) {
-          return i = client.getInbox(i);
+          console.log('About to push commmits into: ');
+          console.log(i._links['add-commit'].href);
+          return client.getInbox(i);
         }, inboxes);
         return context$1$0.abrupt('return', inboxes);
 

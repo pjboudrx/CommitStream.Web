@@ -15,6 +15,7 @@ program
   .option('-d, --debug', 'Show results of each commit, not just summary information')
   .option('-j, --json', 'Log only the JSON output with all the query URLs needed for the performance client')
   .option('-s, --sample', 'Create the commits with sample data that exists in the PR builds', 0)
+  .option('--repourl [repourl]', 'Specifies the repository url that is going to be used in the commits')
   .parse(process.argv);
 
 const number_of_instances = parseInt(program.instances);
@@ -37,8 +38,8 @@ let createMessage = (mention, inbox) => {
   return `${mention} in ${inbox.inboxId} of family = ${inbox.family}`;
 }
 
-let createCommit = async(message, inbox) => {
-  let commitAddResponse = await inbox.commitCreate(message);
+let createCommit = async(message, inbox) => {  
+  let commitAddResponse = await inbox.commitCreate(message, program.repourl);
   if (program.debug) {
     console.log(commitAddResponse.message);
   }
@@ -62,7 +63,8 @@ let createInstanceAndDigest = async(iteration) => {
   }
 
   return {
-    iteration, digest
+    iteration,
+    digest
   };
 };
 
@@ -216,9 +218,13 @@ let createInstanceWithFakeData = R.pipeP(
   createFakeCommits
 );
 
-let getV1Inboxes = async () =>{
-  let inboxes =  await getFromJsonFile(v1_inboxes);
-  inboxes = R.map(i => i = client.getInbox(i), inboxes);
+let getV1Inboxes = async() => {
+  let inboxes = await getFromJsonFile(v1_inboxes);
+  inboxes = R.map(i => {
+    console.log('About to push commmits into: ');
+    console.log(i._links['add-commit'].href);
+    return client.getInbox(i);
+  }, inboxes);
   return inboxes;
 }
 

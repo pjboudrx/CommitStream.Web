@@ -1,6 +1,6 @@
 export default {
 	GitHub : {
-		validWithOneCommit: message => ({
+		validWithOneCommit: (message, repoUrl) => ({
 			"ref": "refs/heads/teamRoomUX2_S-51083",
 			"before": "300417ed43da3a6819d9ee329e06275e0a377a0c",
 			"after": "3b80fa1b0b5641443d9ef59b95b98d1f21e160f6",
@@ -14,7 +14,7 @@ export default {
 			"distinct": true,
 			"message": `${message}`,
 			"timestamp": "2015-01-19T17:00:17-03:00",
-			"url": "https://github.com/openAgile/CommitStream.Web/commit/3b80fa1b0b5641443d9ef59b95b98d1f21e160f6",
+			"url": `${repoUrl}/commit/3b80fa1b0b5641443d9ef59b95b98d1f21e160f6`,
 			"author": {
 				"name": "kunzimariano",
 				"email": "kunzi.mariano@gmail.com",
@@ -42,7 +42,7 @@ export default {
 			"distinct": true,
 			"message": `${message}`,
 			"timestamp": "2015-01-19T17:00:17-03:00",
-			"url": "https://github.com/openAgile/CommitStream.Web/commit/3b80fa1b0b5641443d9ef59b95b98d1f21e160f6",
+			"url": `${repoUrl}/commit/3b80fa1b0b5641443d9ef59b95b98d1f21e160f6`,
 			"author": {
 				"name": "kunzimariano",
 				"email": "kunzi.mariano@gmail.com",
@@ -174,7 +174,7 @@ export default {
 			"type": "User",
 			"site_admin": false
 			}
-		})					
+		})
 	},
 
 	GitLab: {

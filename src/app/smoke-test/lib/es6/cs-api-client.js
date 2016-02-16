@@ -62,22 +62,22 @@ let get = (client, uri, alreadyAbsolute) => {
   }
 };
 
-let postToInboxForFamily = (client, inbox, message, family, extraHeaders) => {
-  return postToLink(client, inbox, 'add-commit', familyPayloadExamples[family].validWithOneCommit(message), extraHeaders);
+let postToInboxForFamily = (client, inbox, message, repoUrl, family, extraHeaders) => {
+  return postToLink(client, inbox, 'add-commit', familyPayloadExamples[family].validWithOneCommit(message, repoUrl), extraHeaders);
 }
 
 let families = {
   GitHub : {
-    commitAdd: (client, inbox, message='GitHub commit') => postToInboxForFamily(client, inbox, message, 'GitHub', {'x-github-event': 'push'})
+    commitAdd: (client, inbox, message='GitHub commit', repoUrl = 'https://github.com/openAgile/CommitStream.Web') => postToInboxForFamily(client, inbox, message, repoUrl, 'GitHub', {'x-github-event': 'push'})
   },
   GitLab : {
-    commitAdd: (client, inbox, message='GitLab commit') => postToInboxForFamily(client, inbox, message, 'GitLab', {'x-gitlab-event': 'Push Hook'})
+    commitAdd: (client, inbox, message='GitLab commit', repoUrl = 'https://github.com/openAgile/CommitStream.Web') => postToInboxForFamily(client, inbox, message, repoUrl, 'GitLab', {'x-gitlab-event': 'Push Hook'})
   },
   Bitbucket : {
-    commitAdd: (client, inbox, message='Bitbucket commit') => postToInboxForFamily(client, inbox, message, 'Bitbucket', {'x-event-key': 'repo:push'})
+    commitAdd: (client, inbox, message='Bitbucket commit', repoUrl = 'https://github.com/openAgile/CommitStream.Web') => postToInboxForFamily(client, inbox, message, repoUrl, 'Bitbucket', {'x-event-key': 'repo:push'})
   },
   VsoGit : {
-    commitAdd: (client, inbox, message='VsoGit commit') => postToInboxForFamily(client, inbox, message, 'VsoGit')
+    commitAdd: (client, inbox, message='VsoGit commit', repoUrl = 'https://github.com/openAgile/CommitStream.Web') => postToInboxForFamily(client, inbox, message, repoUrl,  'VsoGit')
   }
 };
 
@@ -144,8 +144,8 @@ class Digest extends Resource {
 }
 
 class Inbox extends Resource {
-  async commitCreate(message) {
-    let commitResponse = await families[this.family].commitAdd(this[clientSymbol], this[resourceSymbol], message);
+  async commitCreate(message, repoUrl) {    
+    let commitResponse = await families[this.family].commitAdd(this[clientSymbol], this[resourceSymbol], message, repoUrl);
     return commitResponse;
   }
 }
