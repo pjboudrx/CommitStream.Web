@@ -685,7 +685,7 @@ var createStoriesWithTestsAndTasks = function createStoriesWithTestsAndTasks(inb
 
           mention += task + ' ';
         }
-        //4 so we pass the 25 mentions
+        //26 so we pass the 25 mentions total
         context$1$0.next = 31;
         break;
 
@@ -721,7 +721,7 @@ var createStoriesWithTestsAndTasks = function createStoriesWithTestsAndTasks(inb
 
       case 39:
         context$1$0.next = 41;
-        return _regeneratorRuntime.awrap(fromZeroTo(4, function callee$1$0(i) {
+        return _regeneratorRuntime.awrap(fromZeroTo(26, function callee$1$0(i) {
           var message;
           return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
             while (1) switch (context$2$0.prev = context$2$0.next) {
@@ -1026,149 +1026,20 @@ var createMultipleTasks = function createMultipleTasks(inbox, story) {
   }, null, _this, [[4, 17, 21, 29], [22,, 24, 28]]);
 };
 
-var create25PerAsset = function create25PerAsset(inbox, story) {
-  return _regeneratorRuntime.async(function create25PerAsset$(context$1$0) {
-    var _this5 = this;
-
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        console.log('Creating 25 commits per asset.');
-        context$1$0.next = 3;
-        return _regeneratorRuntime.awrap(fromZeroTo(25, function callee$1$0(i) {
-          var _iteratorNormalCompletion13, _didIteratorError13, _iteratorError13, _iterator13, _step13, test, message, _iteratorNormalCompletion14, _didIteratorError14, _iteratorError14, _iterator14, _step14, task;
-
-          return _regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            while (1) switch (context$2$0.prev = context$2$0.next) {
-              case 0:
-                _iteratorNormalCompletion13 = true;
-                _didIteratorError13 = false;
-                _iteratorError13 = undefined;
-                context$2$0.prev = 3;
-                _iterator13 = _getIterator(story.Tests);
-
-              case 5:
-                if (_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done) {
-                  context$2$0.next = 13;
-                  break;
-                }
-
-                test = _step13.value;
-                message = createMessage(test + ' on iteration ' + i, inbox);
-                context$2$0.next = 10;
-                return _regeneratorRuntime.awrap(createCommit(message, inbox));
-
-              case 10:
-                _iteratorNormalCompletion13 = true;
-                context$2$0.next = 5;
-                break;
-
-              case 13:
-                context$2$0.next = 19;
-                break;
-
-              case 15:
-                context$2$0.prev = 15;
-                context$2$0.t0 = context$2$0['catch'](3);
-                _didIteratorError13 = true;
-                _iteratorError13 = context$2$0.t0;
-
-              case 19:
-                context$2$0.prev = 19;
-                context$2$0.prev = 20;
-
-                if (!_iteratorNormalCompletion13 && _iterator13['return']) {
-                  _iterator13['return']();
-                }
-
-              case 22:
-                context$2$0.prev = 22;
-
-                if (!_didIteratorError13) {
-                  context$2$0.next = 25;
-                  break;
-                }
-
-                throw _iteratorError13;
-
-              case 25:
-                return context$2$0.finish(22);
-
-              case 26:
-                return context$2$0.finish(19);
-
-              case 27:
-                _iteratorNormalCompletion14 = true;
-                _didIteratorError14 = false;
-                _iteratorError14 = undefined;
-                context$2$0.prev = 30;
-                _iterator14 = _getIterator(story.Tasks);
-
-              case 32:
-                if (_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done) {
-                  context$2$0.next = 40;
-                  break;
-                }
-
-                task = _step14.value;
-                message = createMessage(task + ' on iteration ' + i, inbox);
-                context$2$0.next = 37;
-                return _regeneratorRuntime.awrap(createCommit(message, inbox));
-
-              case 37:
-                _iteratorNormalCompletion14 = true;
-                context$2$0.next = 32;
-                break;
-
-              case 40:
-                context$2$0.next = 46;
-                break;
-
-              case 42:
-                context$2$0.prev = 42;
-                context$2$0.t1 = context$2$0['catch'](30);
-                _didIteratorError14 = true;
-                _iteratorError14 = context$2$0.t1;
-
-              case 46:
-                context$2$0.prev = 46;
-                context$2$0.prev = 47;
-
-                if (!_iteratorNormalCompletion14 && _iterator14['return']) {
-                  _iterator14['return']();
-                }
-
-              case 49:
-                context$2$0.prev = 49;
-
-                if (!_didIteratorError14) {
-                  context$2$0.next = 52;
-                  break;
-                }
-
-                throw _iteratorError14;
-
-              case 52:
-                return context$2$0.finish(49);
-
-              case 53:
-                return context$2$0.finish(46);
-
-              case 54:
-                ;
-
-              case 55:
-              case 'end':
-                return context$2$0.stop();
-            }
-          }, null, _this5, [[3, 15, 19, 27], [20,, 22, 26], [30, 42, 46, 54], [47,, 49, 53]]);
-        }));
-
-      case 3:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, _this);
-};
+// let create25PerAsset = async(inbox, story) => {
+//   console.log('Creating 25 commits per asset.');
+//   await fromZeroTo(25, async i => {
+//     for (let test of story.Tests) {
+//       let message = createMessage(`${test} on iteration ${i}`, inbox)
+//       await createCommit(message, inbox);
+//     }
+//
+//     for (let task of story.Tasks) {
+//       let message = createMessage(`${task} on iteration ${i}`, inbox)
+//       await createCommit(message, inbox);
+//     };
+//   });
+// }
 
 var createInstanceWithFakeData = _ramda2['default'].pipeP(createInstanceAndDigest, getInboxesToCreate, createInboxes, createFakeCommits);
 
@@ -1200,7 +1071,7 @@ var getV1Inboxes = function getV1Inboxes() {
 var run = function run() {
   var inboxes;
   return _regeneratorRuntime.async(function run$(context$1$0) {
-    var _this6 = this;
+    var _this5 = this;
 
     while (1) switch (context$1$0.prev = context$1$0.next) {
       case 0:
@@ -1267,7 +1138,7 @@ var run = function run() {
               case 'end':
                 return context$2$0.stop();
             }
-          }, null, _this6);
+          }, null, _this5);
         });
 
       case 27:

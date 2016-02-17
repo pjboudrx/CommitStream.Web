@@ -158,8 +158,8 @@ let createStoriesWithTestsAndTasks = async(inbox, story) => {
   for (let task of story.Tasks) {
     mention += task + ' ';
   }
-  //4 so we pass the 25 mentions
-  await fromZeroTo(4, async i => {
+  //26 so we pass the 25 mentions total
+  await fromZeroTo(26, async i => {
     let message = createMessage(`${mention} ${i}`, inbox)
     await createCommit(message, inbox);
   });
@@ -197,20 +197,20 @@ let createMultipleTasks = async(inbox, story) => {
   }
 }
 
-let create25PerAsset = async(inbox, story) => {
-  console.log('Creating 25 commits per asset.');
-  await fromZeroTo(25, async i => {
-    for (let test of story.Tests) {
-      let message = createMessage(`${test} on iteration ${i}`, inbox)
-      await createCommit(message, inbox);
-    }
-
-    for (let task of story.Tasks) {
-      let message = createMessage(`${task} on iteration ${i}`, inbox)
-      await createCommit(message, inbox);
-    };
-  });
-}
+// let create25PerAsset = async(inbox, story) => {
+//   console.log('Creating 25 commits per asset.');
+//   await fromZeroTo(25, async i => {
+//     for (let test of story.Tests) {
+//       let message = createMessage(`${test} on iteration ${i}`, inbox)
+//       await createCommit(message, inbox);
+//     }
+//
+//     for (let task of story.Tasks) {
+//       let message = createMessage(`${task} on iteration ${i}`, inbox)
+//       await createCommit(message, inbox);
+//     };
+//   });
+// }
 
 let createInstanceWithFakeData = R.pipeP(
   createInstanceAndDigest,
